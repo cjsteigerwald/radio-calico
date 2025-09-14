@@ -2,6 +2,8 @@
  * Application State Management
  * Centralized state for the RadioCalico application
  */
+import { QUALITY_LOADING_STATE } from './constants.js';
+
 export class AppState {
   constructor() {
     this.state = {
@@ -20,7 +22,7 @@ export class AppState {
         status: 'Ready to play'
       },
       quality: {
-        source: 'Loading...',
+        source: QUALITY_LOADING_STATE,
         stream: '48kHz FLAC / HLS Lossless'
       },
       rating: {
