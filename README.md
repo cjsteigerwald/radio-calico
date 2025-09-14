@@ -4,7 +4,7 @@
 ![Coverage](https://img.shields.io/badge/coverage-backend%2080%25%20%7C%20frontend%2075%25-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A modern internet radio streaming application with high-quality audio and interactive features. Built with Node.js/Express backend and modular frontend architecture. Features comprehensive unit testing with Jest.
+A modern internet radio streaming application with high-quality audio and interactive features. Built with Node.js/Express backend and modular frontend architecture. Features comprehensive unit testing with Jest, including in-memory database isolation and full CI/CD integration.
 
 ## Features
 
@@ -171,8 +171,10 @@ Requires ES6 modules and modern CSS support.
 ### Framework
 - **Jest** - Testing framework for both frontend and backend
 - **Separate Configurations** - Optimized for Node.js and browser environments
+- **In-Memory Database** - SQLite `:memory:` for isolated test execution
 - **Coverage Targets** - 80% backend, 75% frontend
-- **Continuous Integration Ready** - GitHub Actions compatible
+- **CI/CD Integration** - Jest-JUnit reporter for GitHub Actions and other CI systems
+- **Test Isolation** - Proper setup/teardown with database cleanup
 
 ### Running Tests
 ```bash
@@ -195,24 +197,39 @@ npm run test:frontend
 ### Test Structure
 - **Backend Tests** (`tests/backend/`)
   - Unit tests for services, controllers, middleware
-  - Integration tests for API endpoints
-  - Database mocking with in-memory SQLite
+  - Integration tests for API endpoints (planned)
+  - In-memory SQLite database for test isolation
+  - Automatic database cleanup after tests
 
 - **Frontend Tests** (`tests/frontend/`)
   - Unit tests for modules and utilities
-  - DOM testing with JSDOM
-  - Mocked browser APIs (localStorage, fetch)
+  - DOM testing with JSDOM environment
+  - Mocked browser APIs (localStorage, fetch, HLS.js)
+  - ES6 module support with Babel transpilation
+
+### Test Configuration
+- **Jest Config** (`jest.config.js`) - Main configuration orchestrating test suites
+- **Backend Setup** (`tests/setup/backend.setup.js`) - Node environment with in-memory database
+- **Frontend Setup** (`tests/setup/frontend.setup.js`) - JSDOM environment with browser mocks
+- **Babel Config** (`.babelrc`) - ES6 module transpilation for tests
 
 ### Coverage Reports
-Generated in `coverage/` directory after running `npm run test:coverage`
+- Generated in `coverage/` directory after running `npm run test:coverage`
+- JUnit XML reports in `test-results/` for CI/CD integration
+- Separate coverage tracking for backend and frontend code
 
 ## Documentation
 
-Comprehensive technical documentation available in `/kb/`:
+### Technical Documentation (`/kb/`)
 - **Frontend Architecture** - Component structure and patterns
 - **CSS Architecture** - Design system and styling approach
 - **JavaScript Modules** - Module system and API reference
-- **Testing Strategy** - Testing approach and guidelines (`docs/testing-strategy.md`)
+- **Backend Architecture** - MVC patterns and service layer
+
+### Testing Documentation (`/docs/`)
+- **Testing Strategy** (`testing-strategy.md`) - Complete testing approach and guidelines
+- **Testing Framework** (`testing-framework-summary.md`) - Framework overview and setup
+- **Testing Fixes Plan** (`testing-critical-fixes-plan.md`) - Phase 1 critical fixes documentation
 
 ## Contributing
 
