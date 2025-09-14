@@ -138,13 +138,20 @@ export class MetadataService {
       // Parse values as integers and validate before processing
       const bitDepth = parseInt(metadata.bit_depth, 10);
       const sampleRate = parseInt(metadata.sample_rate, 10);
-      
+
       // Check if values are valid numbers
       if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
-        const formattedQuality = this.formatQuality(bitDepth, sampleRate);
+        const sourceQuality = this.formatQuality(bitDepth, sampleRate);
+
+        // Source quality from metadata
+        // Stream quality: HLS adaptive bitrate streaming
+        // The actual stream quality may vary based on network conditions
+        // but typically streams at 48kHz for HLS
+        const streamQuality = metadata.stream_quality || 'HLS Adaptive (up to 48kHz)';
+
         this.appState.setBatch({
-          'quality.source': formattedQuality,
-          'quality.stream': formattedQuality
+          'quality.source': sourceQuality,
+          'quality.stream': streamQuality
         });
       } else {
         // Fallback when values are invalid

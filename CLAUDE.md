@@ -88,10 +88,13 @@ The backend follows a modular MVC architecture with clear separation of concerns
 #### JavaScript Architecture (ES6 Modules)
 - **public/js/app.js**: Main application coordinator
 - **public/js/utils/AppState.js**: Centralized state management
+- **public/js/utils/constants.js**: Application constants and states
 - **public/js/services/**: External service integrations
   - ApiService.js: Backend API communication
   - iTunesService.js: Album artwork fetching with caching
-  - MetadataService.js: Track metadata polling
+  - MetadataService.js: Track metadata polling with quality parsing
+    - Displays source quality from metadata (bit_depth/sample_rate)
+    - Shows HLS adaptive stream quality separately
 - **public/js/modules/**: Core functionality modules
   - AudioPlayer.js: HLS.js streaming integration
   - RatingSystem.js: Song rating with backend sync
