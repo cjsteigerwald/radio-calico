@@ -196,7 +196,27 @@ export class AppState {
 js/services/
 ├── ApiService.js      # Backend API communication
 ├── iTunesService.js   # Album artwork fetching
-└── MetadataService.js # Track metadata polling
+└── MetadataService.js # Track metadata polling with quality detection
+```
+
+#### MetadataService - Quality Display
+```javascript
+export class MetadataService {
+  parseQuality(metadata) {
+    // Source quality from metadata
+    if (metadata.bit_depth && metadata.sample_rate) {
+      const sourceQuality = `${metadata.bit_depth}-bit ${(metadata.sample_rate/1000).toFixed(1)}kHz`;
+
+      // Stream quality (HLS adaptive)
+      const streamQuality = metadata.stream_quality || 'HLS Adaptive (up to 48kHz)';
+
+      this.appState.setBatch({
+        'quality.source': sourceQuality,
+        'quality.stream': streamQuality
+      });
+    }
+  }
+}
 ```
 
 #### API Service Pattern

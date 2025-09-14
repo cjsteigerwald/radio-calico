@@ -603,7 +603,7 @@
 
             <div class="quality-info">
                 <p class="quality-title">Source quality: <span id="sourceQuality">Loading...</span></p>
-                <p class="quality-details">Stream quality: <span id="streamQuality">48kHz FLAC / HLS Lossless</span></p>
+                <p class="quality-details">Stream quality: <span id="streamQuality">Loading...</span></p>
             </div>
 
             <div class="rating-section">
@@ -871,8 +871,24 @@
 
                 // Update audio quality info
                 if (metadata.bit_depth && metadata.sample_rate) {
-                    const khz = (metadata.sample_rate / 1000).toFixed(1);
-                    sourceQuality.textContent = `${metadata.bit_depth}-bit ${khz}kHz`;
+                    const bitDepth = parseInt(metadata.bit_depth, 10);
+                    const sampleRate = parseInt(metadata.sample_rate, 10);
+
+                    if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
+                        const khz = (sampleRate / 1000).toFixed(1);
+                        const sourceQualityText = `${bitDepth}-bit ${khz}kHz`;
+                        sourceQuality.textContent = sourceQualityText;
+
+                        // Stream quality - HLS adaptive streaming
+                        // Check if metadata has stream_quality field, otherwise use default HLS description
+                        streamQuality.textContent = metadata.stream_quality || 'HLS Adaptive (up to 48kHz)';
+                    } else {
+                        sourceQuality.textContent = 'Unknown';
+                        streamQuality.textContent = 'Unknown';
+                    }
+                } else {
+                    sourceQuality.textContent = 'Unknown';
+                    streamQuality.textContent = 'Unknown';
                 }
 
 

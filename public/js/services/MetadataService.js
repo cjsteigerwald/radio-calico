@@ -138,19 +138,36 @@ export class MetadataService {
       // Parse values as integers and validate before processing
       const bitDepth = parseInt(metadata.bit_depth, 10);
       const sampleRate = parseInt(metadata.sample_rate, 10);
-      
+
       // Check if values are valid numbers
       if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
-        this.appState.set('quality.source', this.formatQuality(bitDepth, sampleRate));
+        const sourceQuality = this.formatQuality(bitDepth, sampleRate);
+
+        // Source quality from metadata
+        // Stream quality: HLS adaptive bitrate streaming
+        // The actual stream quality may vary based on network conditions
+        // but typically streams at 48kHz for HLS
+        const streamQuality = metadata.stream_quality || 'HLS Adaptive (up to 48kHz)';
+
+        this.appState.setBatch({
+          'quality.source': sourceQuality,
+          'quality.stream': streamQuality
+        });
       } else {
         // Fallback when values are invalid
-        this.appState.set('quality.source', QUALITY_UNKNOWN_STATE);
+        this.appState.setBatch({
+          'quality.source': QUALITY_UNKNOWN_STATE,
+          'quality.stream': QUALITY_UNKNOWN_STATE
+        });
       }
     } else {
       // Fallback when no quality data is available
       // Only set to "Unknown" if we're still showing "Loading..."
       if (this.appState.get('quality.source') === QUALITY_LOADING_STATE) {
-        this.appState.set('quality.source', QUALITY_UNKNOWN_STATE);
+        this.appState.setBatch({
+          'quality.source': QUALITY_UNKNOWN_STATE,
+          'quality.stream': QUALITY_UNKNOWN_STATE
+        });
       }
     }
   }

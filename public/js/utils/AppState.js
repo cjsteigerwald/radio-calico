@@ -23,7 +23,7 @@ export class AppState {
       },
       quality: {
         source: QUALITY_LOADING_STATE,
-        stream: '48kHz FLAC / HLS Lossless'
+        stream: QUALITY_LOADING_STATE
       },
       rating: {
         thumbsUp: 0,

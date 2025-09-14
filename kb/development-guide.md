@@ -1,4 +1,4 @@
-# RadioCalico Backend Development Guide
+# RadioCalico Development Guide
 
 ## Quick Start
 
@@ -10,16 +10,25 @@
 ### Setup
 ```bash
 # Clone and setup
-git clone <repository>
-cd radiocalico
+git clone https://github.com/cjsteigerwald/radio-calico.git
+cd radio-calico
 npm install
 
-# Create environment file
+# Create environment file (if needed)
 cp .env.example .env
 
 # Start development server
 npm run dev
+
+# Or production server
+npm start
 ```
+
+### Accessing the Application
+- **Modern PWA**: http://localhost:3000/radio-modular.html (recommended)
+- **Legacy Version**: http://localhost:3000/radio.html
+- **Health Dashboard**: http://localhost:3000/
+- **API Health**: http://localhost:3000/api/health
 
 ## Development Workflow
 
@@ -295,6 +304,43 @@ res.status(400).json({
   success: false,
   error: 'Descriptive error message'
 });
+```
+
+## Recent Features & Updates
+
+### Audio Quality Display (Phase 2 Enhancement)
+The application now dynamically displays audio quality information:
+
+#### Implementation Details
+- **Source Quality**: Parsed from `bit_depth` and `sample_rate` in metadata
+- **Stream Quality**: Shows HLS adaptive streaming information
+- **Both Versions Updated**: `radio.html` and `radio-modular.html`
+
+#### Metadata Structure
+```javascript
+// Sample metadata from https://d3d4yli4hf5bmh.cloudfront.net/metadatav2.json
+{
+  "bit_depth": 16,
+  "sample_rate": 44100,
+  "artist": "Artist Name",
+  "title": "Song Title",
+  "album": "Album Name",
+  // ... other fields
+}
+```
+
+#### Quality Display Logic
+```javascript
+// MetadataService.js
+if (metadata.bit_depth && metadata.sample_rate) {
+  const sourceQuality = `${metadata.bit_depth}-bit ${(metadata.sample_rate/1000).toFixed(1)}kHz`;
+  const streamQuality = metadata.stream_quality || 'HLS Adaptive (up to 48kHz)';
+
+  this.appState.setBatch({
+    'quality.source': sourceQuality,  // e.g., "16-bit 44.1kHz"
+    'quality.stream': streamQuality   // e.g., "HLS Adaptive (up to 48kHz)"
+  });
+}
 ```
 
 ## Testing Guidelines
