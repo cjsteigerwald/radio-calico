@@ -1,6 +1,10 @@
 # RadioCalico
 
-A modern internet radio streaming application with high-quality audio and interactive features. Built with Node.js/Express backend and modular frontend architecture.
+![Tests](https://img.shields.io/badge/tests-33%20passing-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-backend%2080%25%20%7C%20frontend%2075%25-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+A modern internet radio streaming application with high-quality audio and interactive features. Built with Node.js/Express backend and modular frontend architecture. Features comprehensive unit testing with Jest.
 
 ## Features
 
@@ -59,19 +63,39 @@ npm start
 radiocalico/
 ├── src/                    # Backend source code
 │   ├── server.js          # Express server
-│   ├── database/          # Database module
-│   ├── models/            # Data models
-│   ├── controllers/       # Route controllers
-│   └── routes/            # API routes
+│   ├── config/            # Configuration management
+│   ├── controllers/       # Request handlers
+│   ├── services/          # Business logic
+│   ├── routes/            # API endpoints
+│   ├── middleware/        # Express middleware
+│   └── database/          # Database operations
 ├── public/                # Frontend assets
-│   ├── radio-modular.html # Main application
+│   ├── radio-modular.html # Main PWA application
+│   ├── radio.html         # Legacy version
 │   ├── css/               # Modular stylesheets
+│   │   ├── base/          # Foundation styles
+│   │   ├── components/    # Component styles
+│   │   └── utilities/     # Helper classes
 │   ├── js/                # ES6 modules
+│   │   ├── modules/       # Core functionality
+│   │   ├── services/      # API integrations
+│   │   └── utils/         # Shared utilities
 │   └── sw.js              # Service worker
-├── kb/                    # Knowledge base documentation
+├── tests/                 # Test suites
+│   ├── backend/           # Backend tests
+│   │   ├── unit/          # Unit tests
+│   │   └── integration/   # Integration tests
+│   ├── frontend/          # Frontend tests
+│   │   ├── unit/          # Unit tests
+│   │   └── mocks/         # Test mocks
+│   └── setup/             # Test configuration
+├── docs/                  # Project documentation
+│   ├── testing-strategy.md
+│   └── testing-framework-summary.md
+├── kb/                    # Knowledge base
 │   ├── frontend-architecture.md
-│   ├── css-architecture.md
-│   └── javascript-modules.md
+│   ├── backend-architecture.md
+│   └── development-guide.md
 └── database/              # SQLite database files
 ```
 
@@ -93,10 +117,14 @@ radiocalico/
 
 ### Commands
 ```bash
-npm run dev      # Start with nodemon auto-reload
-npm start        # Production server
-npm test         # Run test suite (when configured)
-npm install      # Install dependencies
+npm run dev          # Start with nodemon auto-reload
+npm start            # Production server
+npm test             # Run all test suites
+npm run test:backend # Run backend tests only
+npm run test:frontend # Run frontend tests only
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Generate coverage report
+npm install          # Install dependencies
 ```
 
 ### Environment Configuration
@@ -138,12 +166,53 @@ RadioCalico includes PWA features:
 
 Requires ES6 modules and modern CSS support.
 
+## Testing
+
+### Framework
+- **Jest** - Testing framework for both frontend and backend
+- **Separate Configurations** - Optimized for Node.js and browser environments
+- **Coverage Targets** - 80% backend, 75% frontend
+- **Continuous Integration Ready** - GitHub Actions compatible
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode for development
+npm run test:watch
+
+# Backend tests only
+npm run test:backend
+
+# Frontend tests only
+npm run test:frontend
+```
+
+### Test Structure
+- **Backend Tests** (`tests/backend/`)
+  - Unit tests for services, controllers, middleware
+  - Integration tests for API endpoints
+  - Database mocking with in-memory SQLite
+
+- **Frontend Tests** (`tests/frontend/`)
+  - Unit tests for modules and utilities
+  - DOM testing with JSDOM
+  - Mocked browser APIs (localStorage, fetch)
+
+### Coverage Reports
+Generated in `coverage/` directory after running `npm run test:coverage`
+
 ## Documentation
 
 Comprehensive technical documentation available in `/kb/`:
 - **Frontend Architecture** - Component structure and patterns
 - **CSS Architecture** - Design system and styling approach
 - **JavaScript Modules** - Module system and API reference
+- **Testing Strategy** - Testing approach and guidelines (`docs/testing-strategy.md`)
 
 ## Contributing
 

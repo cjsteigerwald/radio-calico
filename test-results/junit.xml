@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="33" failures="0" errors="0" time="1.163">
+  <testsuite name="AppState" errors="0" failures="0" skipped="0" timestamp="2025-09-14T23:17:30" time="0.585" tests="21">
+    <testcase classname="AppState get/set operations should set and get simple values" name="AppState get/set operations should set and get simple values" time="0.004">
+    </testcase>
+    <testcase classname="AppState get/set operations should handle nested paths" name="AppState get/set operations should handle nested paths" time="0.002">
+    </testcase>
+    <testcase classname="AppState get/set operations should return undefined for non-existent keys" name="AppState get/set operations should return undefined for non-existent keys" time="0.001">
+    </testcase>
+    <testcase classname="AppState get/set operations should overwrite existing values" name="AppState get/set operations should overwrite existing values" time="0.001">
+    </testcase>
+    <testcase classname="AppState get/set operations should handle null and undefined values" name="AppState get/set operations should handle null and undefined values" time="0.001">
+    </testcase>
+    <testcase classname="AppState setBatch operations should set multiple values at once" name="AppState setBatch operations should set multiple values at once" time="0.001">
+    </testcase>
+    <testcase classname="AppState setBatch operations should trigger callbacks for all changed values" name="AppState setBatch operations should trigger callbacks for all changed values" time="0.002">
+    </testcase>
+    <testcase classname="AppState subscription system should notify subscribers on value change" name="AppState subscription system should notify subscribers on value change" time="0.001">
+    </testcase>
+    <testcase classname="AppState subscription system should pass old value to callback" name="AppState subscription system should pass old value to callback" time="0.001">
+    </testcase>
+    <testcase classname="AppState subscription system should support multiple subscribers for same key" name="AppState subscription system should support multiple subscribers for same key" time="0.001">
+    </testcase>
+    <testcase classname="AppState subscription system should notify even if value does not change (current implementation)" name="AppState subscription system should notify even if value does not change (current implementation)" time="0">
+    </testcase>
+    <testcase classname="AppState subscription system should handle nested path subscriptions" name="AppState subscription system should handle nested path subscriptions" time="0">
+    </testcase>
+    <testcase classname="AppState subscription system should unsubscribe correctly" name="AppState subscription system should unsubscribe correctly" time="0.001">
+    </testcase>
+    <testcase classname="AppState exact key subscriptions only does not support wildcard subscriptions" name="AppState exact key subscriptions only does not support wildcard subscriptions" time="0.001">
+    </testcase>
+    <testcase classname="AppState exact key subscriptions only requires exact key match" name="AppState exact key subscriptions only requires exact key match" time="0">
+    </testcase>
+    <testcase classname="AppState additional utility methods has getUserIdentifier method" name="AppState additional utility methods has getUserIdentifier method" time="0.001">
+    </testcase>
+    <testcase classname="AppState additional utility methods has getCurrentSongId method" name="AppState additional utility methods has getCurrentSongId method" time="0.001">
+    </testcase>
+    <testcase classname="AppState edge cases should handle arrays as values" name="AppState edge cases should handle arrays as values" time="0">
+    </testcase>
+    <testcase classname="AppState edge cases should handle objects as values" name="AppState edge cases should handle objects as values" time="0.001">
+    </testcase>
+    <testcase classname="AppState edge cases should handle empty string keys gracefully" name="AppState edge cases should handle empty string keys gracefully" time="0.001">
+    </testcase>
+    <testcase classname="AppState edge cases should handle special characters in keys" name="AppState edge cases should handle special characters in keys" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="UserService" errors="0" failures="0" skipped="0" timestamp="2025-09-14T23:17:31" time="0.097" tests="12">
+    <testcase classname="UserService validateUserInput should return empty array for valid input" name="UserService validateUserInput should return empty array for valid input" time="0.001">
+    </testcase>
+    <testcase classname="UserService validateUserInput should return error for missing username" name="UserService validateUserInput should return error for missing username" time="0">
+    </testcase>
+    <testcase classname="UserService validateUserInput should return error for missing email" name="UserService validateUserInput should return error for missing email" time="0">
+    </testcase>
+    <testcase classname="UserService validateUserInput should return error for invalid email format" name="UserService validateUserInput should return error for invalid email format" time="0">
+    </testcase>
+    <testcase classname="UserService validateUserInput should return multiple errors for multiple invalid fields" name="UserService validateUserInput should return multiple errors for multiple invalid fields" time="0.001">
+    </testcase>
+    <testcase classname="UserService validateUserInput should handle whitespace in email validation" name="UserService validateUserInput should handle whitespace in email validation" time="0">
+    </testcase>
+    <testcase classname="UserService validateUserInput should accept usernames with special characters (no username format validation)" name="UserService validateUserInput should accept usernames with special characters (no username format validation)" time="0">
+    </testcase>
+    <testcase classname="UserService validateUserInput should accept any non-empty username" name="UserService validateUserInput should accept any non-empty username" time="0.001">
+    </testcase>
+    <testcase classname="UserService isValidEmail should validate correct email format" name="UserService isValidEmail should validate correct email format" time="0">
+    </testcase>
+    <testcase classname="UserService isValidEmail should reject invalid email format" name="UserService isValidEmail should reject invalid email format" time="0.001">
+    </testcase>
+    <testcase classname="UserService createUser validates input before database operation" name="UserService createUser validates input before database operation" time="0.007">
+    </testcase>
+    <testcase classname="UserService getAllUsers requires database integration (skipped in unit tests)" name="UserService getAllUsers requires database integration (skipped in unit tests)" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>
