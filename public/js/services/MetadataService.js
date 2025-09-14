@@ -2,6 +2,8 @@
  * Metadata Service
  * Handles fetching and updating track metadata and artwork
  */
+import { QUALITY_LOADING_STATE, QUALITY_UNKNOWN_STATE } from '../utils/constants.js';
+
 export class MetadataService {
   constructor(appState, iTunesService) {
     this.appState = appState;
@@ -70,8 +72,31 @@ export class MetadataService {
   }
 
   /**
+   * Format quality string from bit depth and sample rate
+   * @param {number} bitDepth - Bit depth (e.g., 16, 24)
+   * @param {number} sampleRate - Sample rate in Hz (e.g., 44100)
+   * @returns {string} Formatted quality string (e.g., "16-bit 44.1kHz")
+   */
+  formatQuality(bitDepth, sampleRate) {
+    // Use integer division for cleaner display of standard rates
+    const khz = sampleRate % 1000 === 0 
+      ? (sampleRate / 1000).toString()
+      : (sampleRate / 1000).toFixed(1);
+    return `${bitDepth}-bit ${khz}kHz`;
+  }
+
+  /**
    * Process fetched metadata
    * @param {Object} metadata - Raw metadata from server
+   * @param {Object} [metadata.quality] - Quality object (legacy format)
+   * @param {string} [metadata.quality.source] - Source quality string
+   * @param {string} [metadata.quality.stream] - Stream quality string
+   * @param {number|string} [metadata.bit_depth] - Bit depth (new format)
+   * @param {number|string} [metadata.sample_rate] - Sample rate in Hz (new format)
+   * @param {Object} [metadata.track] - Track information object
+   * @param {string} [metadata.artist] - Artist name (fallback format)
+   * @param {string} [metadata.title] - Track title (fallback format)
+   * @param {string} [metadata.album] - Album name (fallback format)
    */
   async processMetadata(metadata) {
     // Extract track information
@@ -102,11 +127,31 @@ export class MetadataService {
     }
 
     // Update quality information if available
+    // Handle both metadata.quality object format and direct bit_depth/sample_rate fields
     if (metadata.quality) {
       this.appState.setBatch({
         'quality.source': metadata.quality.source || this.appState.get('quality.source'),
         'quality.stream': metadata.quality.stream || this.appState.get('quality.stream')
       });
+    } else if (metadata.bit_depth && metadata.sample_rate) {
+      // Handle metadatav2.json format with bit_depth and sample_rate
+      // Parse values as integers and validate before processing
+      const bitDepth = parseInt(metadata.bit_depth, 10);
+      const sampleRate = parseInt(metadata.sample_rate, 10);
+      
+      // Check if values are valid numbers
+      if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
+        this.appState.set('quality.source', this.formatQuality(bitDepth, sampleRate));
+      } else {
+        // Fallback when values are invalid
+        this.appState.set('quality.source', QUALITY_UNKNOWN_STATE);
+      }
+    } else {
+      // Fallback when no quality data is available
+      // Only set to "Unknown" if we're still showing "Loading..."
+      if (this.appState.get('quality.source') === QUALITY_LOADING_STATE) {
+        this.appState.set('quality.source', QUALITY_UNKNOWN_STATE);
+      }
     }
   }
 
