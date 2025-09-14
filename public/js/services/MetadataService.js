@@ -110,8 +110,24 @@ export class MetadataService {
       });
     } else if (metadata.bit_depth && metadata.sample_rate) {
       // Handle metadatav2.json format with bit_depth and sample_rate
-      const khz = (metadata.sample_rate / 1000).toFixed(1);
-      this.appState.set('quality.source', `${metadata.bit_depth}-bit ${khz}kHz`);
+      // Parse values as integers and validate before processing
+      const bitDepth = parseInt(metadata.bit_depth, 10);
+      const sampleRate = parseInt(metadata.sample_rate, 10);
+      
+      // Check if values are valid numbers
+      if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
+        const khz = (sampleRate / 1000).toFixed(1);
+        this.appState.set('quality.source', `${bitDepth}-bit ${khz}kHz`);
+      } else {
+        // Fallback when values are invalid
+        this.appState.set('quality.source', 'Unknown');
+      }
+    } else {
+      // Fallback when no quality data is available
+      // Only set to "Unknown" if we're still showing "Loading..."
+      if (this.appState.get('quality.source') === 'Loading...') {
+        this.appState.set('quality.source', 'Unknown');
+      }
     }
   }
 
