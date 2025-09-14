@@ -9,15 +9,23 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 **Architecture Status**:
 - Phase 1 (Backend Restructuring) completed ✅ - MVC architecture with comprehensive API
 - Phase 2 (Frontend Modularization) completed ✅ - Component-based architecture with ES6 modules
+- Testing Framework implemented ✅ - Jest unit testing for backend and frontend
 
-**Current Status**: Fully functional with modular backend, modern frontend architecture, PWA capabilities, and comprehensive documentation.
+**Current Status**: Fully functional with modular backend, modern frontend architecture, PWA capabilities, comprehensive documentation, and unit testing framework with 100% test pass rate.
 
 ## Commands
 
 ### Development
 - `npm start` - Start the production server (default port 3000, configurable via PORT env var)
 - `npm run dev` - Start the development server with auto-reload using nodemon
-- `npm test` - Currently not configured (exits with error)
+
+### Testing
+- `npm test` - Run all tests (backend and frontend)
+- `npm run test:backend` - Run backend tests only
+- `npm run test:frontend` - Run frontend tests only
+- `npm run test:watch` - Run tests in watch mode for development
+- `npm run test:coverage` - Generate test coverage report
+- `npm run test:verbose` - Run tests with verbose output
 
 ### Installation
 - `npm install` - Install all dependencies
@@ -61,10 +69,38 @@ The backend follows a modular MVC architecture with clear separation of concerns
   - **logging.js**: Request/response logging
   - **index.js**: Middleware exports
 
-- **src/database/db.js**: Data access layer (existing)
+- **src/database/db.js**: Data access layer
   - SQLite operations for users and song ratings
-  - Auto-creates database directory if missing
+  - Auto-creates database directory if missing (skipped for in-memory databases)
   - Database file location: `./database/radiocalico.db` (configurable via DATABASE_FILE env var)
+  - Supports `:memory:` for in-memory SQLite database (used in testing)
+
+### Testing Framework
+The project includes a comprehensive unit testing framework using Jest:
+
+- **tests/**: Test directory structure
+  - **backend/**: Backend test suites
+    - **unit/**: Unit tests for services, controllers, middleware
+    - **integration/**: Integration tests for API endpoints (planned)
+  - **frontend/**: Frontend test suites
+    - **unit/**: Unit tests for modules, services, utils
+    - **mocks/**: Mock handlers and style mocks
+  - **setup/**: Test configuration files
+    - **jest.backend.config.js**: Backend Jest configuration
+    - **jest.frontend.config.js**: Frontend Jest configuration
+    - **backend.setup.js**: Backend test environment setup (uses in-memory SQLite)
+    - **frontend.setup.js**: Frontend test environment setup (JSDOM, localStorage mocks)
+
+- **Test Configuration**:
+  - In-memory SQLite database for isolated test execution
+  - Proper database cleanup in test teardown
+  - Jest-JUnit reporter for CI/CD integration
+  - Separate Babel configurations for backend/frontend
+
+- **Test Coverage**:
+  - Backend: 80% target coverage
+  - Frontend: 75% target coverage
+  - Current: All tests passing ✅ (33 tests across 2 suites)
 
 ### Frontend (Modular Architecture - Phase 2 Complete)
 
@@ -140,6 +176,13 @@ Comprehensive documentation covering all aspects of the refactored backend:
 - **kb/middleware-documentation.md** - Middleware pipeline documentation
 - **kb/development-guide.md** - Developer workflow and guidelines
 
+### Testing Documentation (docs/)
+Testing strategy and implementation documentation:
+
+- **docs/testing-strategy.md** - Complete testing strategy and approach
+- **docs/testing-framework-summary.md** - Testing framework overview
+- **docs/testing-critical-fixes-plan.md** - Phase 1 critical fixes implementation plan
+
 ### Refactoring Plan (kb/proposed/)
 - **kb/proposed/overview.md** - Complete 8-phase refactoring plan
 - Individual phase documentation for Phases 1-6
@@ -177,6 +220,15 @@ The application uses centralized configuration with environment variable support
 
 ### Development
 - nodemon - Auto-reload on file changes
+- jest (v30.1.3) - Testing framework
+- @types/jest - TypeScript definitions for Jest
+- jest-junit - JUnit reporter for CI
+- supertest (v7.1.4) - HTTP assertion library
+- jsdom (v27.0.0) - DOM implementation for Node.js
+- jest-environment-jsdom - Jest browser environment
+- @testing-library/dom - DOM testing utilities
+- @testing-library/jest-dom - Custom Jest matchers
+- @babel/core, @babel/preset-env, babel-jest - ES6 transpilation
 
 ## Quick Start
 
@@ -191,6 +243,22 @@ npm start
 # - Legacy app: http://localhost:3000/radio.html
 # - Health dashboard: http://localhost:3000/
 # - API health: http://localhost:3000/api/health
+```
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run with coverage report
+npm run test:coverage
+
+# Run in watch mode during development
+npm run test:watch
+
+# Run specific test suite
+npm run test:backend
+npm run test:frontend
 ```
 
 ### Testing API Endpoints
@@ -234,11 +302,28 @@ curl -X POST http://localhost:3000/api/songs/rate \
 - Component communication system
 - Clean separation of concerns (20+ organized files)
 
+### ✅ Completed (Testing Framework Implementation)
+- Jest testing framework for both backend and frontend
+- Separate test configurations for different environments
+- Unit tests for critical services and state management
+- Test coverage targets: 80% backend, 75% frontend
+- All tests passing (33 tests across 2 suites)
+- Mock implementations for external dependencies
+- Testing documentation and best practices
+
+#### Phase 1 Critical Fixes (Completed)
+- Fixed SQLite in-memory database configuration for proper test isolation
+- Removed incorrectly created `:memory:` file issue
+- Added proper database cleanup in test teardown
+- Configured jest-junit reporter for CI/CD integration
+- Updated .gitignore to exclude test artifacts
+- Created comprehensive testing fixes plan documentation
+
 ### 📋 Next Phase (Phase 3 - Build Tooling & Modern Development)
 - Vite build system with hot module replacement
 - ESLint, Prettier, and Stylelint for code quality
 - PostCSS for advanced CSS processing
-- Jest testing framework setup
 - Automated optimization and bundling
+- Expand test coverage to integration and E2E tests
 
 Refer to `kb/proposed/overview.md` for complete 8-phase roadmap.
