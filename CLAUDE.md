@@ -69,10 +69,11 @@ The backend follows a modular MVC architecture with clear separation of concerns
   - **logging.js**: Request/response logging
   - **index.js**: Middleware exports
 
-- **src/database/db.js**: Data access layer (existing)
+- **src/database/db.js**: Data access layer
   - SQLite operations for users and song ratings
-  - Auto-creates database directory if missing
+  - Auto-creates database directory if missing (skipped for in-memory databases)
   - Database file location: `./database/radiocalico.db` (configurable via DATABASE_FILE env var)
+  - Supports `:memory:` for in-memory SQLite database (used in testing)
 
 ### Testing Framework
 The project includes a comprehensive unit testing framework using Jest:
@@ -80,25 +81,26 @@ The project includes a comprehensive unit testing framework using Jest:
 - **tests/**: Test directory structure
   - **backend/**: Backend test suites
     - **unit/**: Unit tests for services, controllers, middleware
-    - **integration/**: Integration tests for API endpoints
-    - **fixtures/**: Test data and database mocks
+    - **integration/**: Integration tests for API endpoints (planned)
   - **frontend/**: Frontend test suites
     - **unit/**: Unit tests for modules, services, utils
-    - **integration/**: Component integration tests
     - **mocks/**: Mock handlers and style mocks
   - **setup/**: Test configuration files
     - **jest.backend.config.js**: Backend Jest configuration
     - **jest.frontend.config.js**: Frontend Jest configuration
-    - **backend.setup.js**: Backend test environment setup
-    - **frontend.setup.js**: Frontend test environment setup
-  - **docs/**: Testing documentation
-    - **testing-strategy.md**: Complete testing strategy guide
-    - **testing-framework-summary.md**: Framework overview
+    - **backend.setup.js**: Backend test environment setup (uses in-memory SQLite)
+    - **frontend.setup.js**: Frontend test environment setup (JSDOM, localStorage mocks)
+
+- **Test Configuration**:
+  - In-memory SQLite database for isolated test execution
+  - Proper database cleanup in test teardown
+  - Jest-JUnit reporter for CI/CD integration
+  - Separate Babel configurations for backend/frontend
 
 - **Test Coverage**:
   - Backend: 80% target coverage
   - Frontend: 75% target coverage
-  - All tests passing ✅ (33 tests across 2 suites)
+  - Current: All tests passing ✅ (33 tests across 2 suites)
 
 ### Frontend (Modular Architecture - Phase 2 Complete)
 
@@ -173,6 +175,13 @@ Comprehensive documentation covering all aspects of the refactored backend:
 - **kb/configuration-guide.md** - Environment and configuration management
 - **kb/middleware-documentation.md** - Middleware pipeline documentation
 - **kb/development-guide.md** - Developer workflow and guidelines
+
+### Testing Documentation (docs/)
+Testing strategy and implementation documentation:
+
+- **docs/testing-strategy.md** - Complete testing strategy and approach
+- **docs/testing-framework-summary.md** - Testing framework overview
+- **docs/testing-critical-fixes-plan.md** - Phase 1 critical fixes implementation plan
 
 ### Refactoring Plan (kb/proposed/)
 - **kb/proposed/overview.md** - Complete 8-phase refactoring plan
@@ -301,6 +310,14 @@ curl -X POST http://localhost:3000/api/songs/rate \
 - All tests passing (33 tests across 2 suites)
 - Mock implementations for external dependencies
 - Testing documentation and best practices
+
+#### Phase 1 Critical Fixes (Completed)
+- Fixed SQLite in-memory database configuration for proper test isolation
+- Removed incorrectly created `:memory:` file issue
+- Added proper database cleanup in test teardown
+- Configured jest-junit reporter for CI/CD integration
+- Updated .gitignore to exclude test artifacts
+- Created comprehensive testing fixes plan documentation
 
 ### 📋 Next Phase (Phase 3 - Build Tooling & Modern Development)
 - Vite build system with hot module replacement
