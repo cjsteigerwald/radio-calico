@@ -20,7 +20,7 @@ export class AppState {
         status: 'Ready to play'
       },
       quality: {
-        source: '16-bit 44.1kHz',
+        source: 'Loading...',
         stream: '48kHz FLAC / HLS Lossless'
       },
       rating: {

@@ -102,11 +102,16 @@ export class MetadataService {
     }
 
     // Update quality information if available
+    // Handle both metadata.quality object format and direct bit_depth/sample_rate fields
     if (metadata.quality) {
       this.appState.setBatch({
         'quality.source': metadata.quality.source || this.appState.get('quality.source'),
         'quality.stream': metadata.quality.stream || this.appState.get('quality.stream')
       });
+    } else if (metadata.bit_depth && metadata.sample_rate) {
+      // Handle metadatav2.json format with bit_depth and sample_rate
+      const khz = (metadata.sample_rate / 1000).toFixed(1);
+      this.appState.set('quality.source', `${metadata.bit_depth}-bit ${khz}kHz`);
     }
   }
 
