@@ -42,8 +42,23 @@ global.testHelpers = {
 };
 
 // Clean up after all tests
-afterAll(() => {
-  // Close database connections, clear timers, etc.
+afterAll(async () => {
+  // Close database connections
+  try {
+    const { db } = require('../../src/database/db');
+    if (db) {
+      await new Promise((resolve, reject) => {
+        db.close((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }
+  } catch (error) {
+    // Database might not have been initialized
+  }
+
+  // Clear timers and mocks
   jest.clearAllTimers();
   jest.clearAllMocks();
 });

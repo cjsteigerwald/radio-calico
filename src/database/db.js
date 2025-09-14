@@ -2,11 +2,17 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.resolve(process.env.DATABASE_FILE || './database/radiocalico.db');
-const dbDir = path.dirname(dbPath);
+// Handle in-memory database for testing
+const dbFile = process.env.DATABASE_FILE || './database/radiocalico.db';
+const isInMemory = dbFile === ':memory:';
+const dbPath = isInMemory ? ':memory:' : path.resolve(dbFile);
 
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+// Only create directory for file-based databases
+if (!isInMemory) {
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
 }
 
 const db = new sqlite3.Database(dbPath, (err) => {
