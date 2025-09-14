@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadioCalico - Local Development</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .status.error {
+            background: #ffebee;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .user-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .users-list {
+            margin-top: 20px;
+        }
+        .user-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        .info {
+            background: #f0f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .info h3 {
+            margin-top: 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RadioCalico Development Server</h1>
+        
+        <p>Welcome to your local development environment!</p>
+        
+        <div style="margin: 20px 0;">
+            <a href="/radio.html" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s;">
+                🎵 Open Radio Player
+            </a>
+        </div>
+        
+        <div class="status" id="status">
+            Checking server status...
+        </div>
+        
+        <button onclick="testDatabase()">Test Database Connection</button>
+        <button onclick="loadUsers()">Show All Users</button>
+        
+        <div id="dbResult"></div>
+        
+        <div class="user-form">
+            <h3>Add New User</h3>
+            <form id="userForm" onsubmit="addUser(event)">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <button type="submit">Add User</button>
+            </form>
+            <div id="userResult"></div>
+        </div>
+        
+        <div class="users-list" id="usersList"></div>
+        
+        <div class="info">
+            <h3>Quick Start:</h3>
+            <ul>
+                <li>Server is running on port 3000</li>
+                <li>SQLite database is located at <code>./database/radiocalico.db</code></li>
+                <li>API endpoints are available at <code>/api/*</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('status').innerHTML = 
+                    `✅ Server is healthy<br>Last checked: ${new Date(data.timestamp).toLocaleString()}`;
+                document.getElementById('status').className = 'status';
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Server is not responding';
+                document.getElementById('status').className = 'status error';
+            }
+        }
+
+        async function testDatabase() {
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.innerHTML = '<div class="status">Testing database connection...</div>';
+            
+            try {
+                const response = await fetch('/api/test-db');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = 
+                        `<div class="status">✅ Database connected successfully<br>Server time: ${data.data.now}</div>`;
+                } else {
+                    resultDiv.innerHTML = 
+                        `<div class="status error">❌ Database connection failed: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = 
+                    `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function addUser(event) {
+            event.preventDefault();
+            const resultDiv = document.getElementById('userResult');
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = 
+                        `<div class="status">✅ ${data.message}</div>`;
+                    document.getElementById('userForm').reset();
+                    loadUsers();
+                } else {
+                    resultDiv.innerHTML = 
+                        `<div class="status error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = 
+                    `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function loadUsers() {
+            const usersDiv = document.getElementById('usersList');
+            
+            try {
+                const response = await fetch('/api/users');
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.users.length === 0) {
+                        usersDiv.innerHTML = '<h3>Users</h3><p>No users found. Add your first user above!</p>';
+                    } else {
+                        let html = '<h3>Users (' + data.users.length + ')</h3>';
+                        data.users.forEach(user => {
+                            html += `
+                                <div class="user-item">
+                                    <strong>${user.username}</strong><br>
+                                    📧 ${user.email}<br>
+                                    <small>Added: ${new Date(user.created_at).toLocaleString()}</small>
+                                </div>
+                            `;
+                        });
+                        usersDiv.innerHTML = html;
+                    }
+                } else {
+                    usersDiv.innerHTML = 
+                        `<div class="status error">❌ Failed to load users: ${data.error}</div>`;
+                }
+            } catch (error) {
+                usersDiv.innerHTML = 
+                    `<div class="status error">❌ Error loading users: ${error.message}</div>`;
+            }
+        }
+
+        checkHealth();
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+/* Header Component Styles */
+.header-bar {
+  background: var(--color-charcoal);
+  color: var(--color-mint);
+  padding: var(--spacing-md) 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  height: var(--header-height);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-header);
+  box-shadow: var(--shadow-md);
+}
+
+.header-bar .logo {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-sm);
+  object-fit: cover;
+}
+
+.header-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+/* Responsive header */
+@media (max-width: 480px) {
+  .header-bar {
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  .header-bar .logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-title {
+    font-size: var(--font-size-lg);
+  }
+}

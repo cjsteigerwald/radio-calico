@@ -1,0 +1,25 @@
+/* RadioCalico Main CSS - Modular Architecture */
+
+/* Base Styles */
+@import url('./base/variables.css');
+@import url('./base/reset.css');
+@import url('./base/layout.css');
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap');
+
+/* Component Styles */
+@import url('./components/header.css');
+@import url('./components/album-artwork.css');
+@import url('./components/track-details.css');
+@import url('./components/rating-system.css');
+@import url('./components/player-controls.css');
+@import url('./components/recent-tracks.css');
+
+/* Utility Classes */
+@import url('./utilities/helpers.css');
+
+/* Component-specific overrides and customizations */
+.audio-player {
+  display: none;
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadioCalico - Live Stream Player</title>
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- Favicon -->
+    <link rel="icon" href="RadioCalicoLogoTM.png" type="image/png">
+
+    <!-- Meta tags for PWA and SEO -->
+    <meta name="description" content="RadioCalico - Live streaming radio with high-quality audio and interactive features">
+    <meta name="theme-color" content="#1F4E23">
+    <meta name="application-name" content="RadioCalico">
+
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="RadioCalico - Live Stream Player">
+    <meta property="og:description" content="High-quality internet radio streaming">
+    <meta property="og:image" content="RadioCalicoLogoTM.png">
+    <meta property="og:type" content="website">
+</head>
+<body class="layout-container">
+    <!-- Header -->
+    <header class="header-bar" role="banner">
+        <img src="RadioCalicoLogoTM.png" alt="RadioCalico Logo" class="logo">
+        <h1 class="header-title">Radio Calico</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+        <!-- Album Art Section -->
+        <section class="album-section" aria-label="Album artwork and artist information">
+            <div class="album-artwork-container">
+                <img
+                    id="albumArtworkLarge"
+                    class="album-artwork-large"
+                    src=""
+                    alt="Album artwork"
+                    style="display: none;"
+                >
+                <div
+                    id="albumPlaceholder"
+                    class="album-artwork-large loading"
+                    aria-label="Loading album artwork"
+                >
+                    <div class="artist-overlay">
+                        <h2 id="artistNameLarge" class="artist-name-large">LOADING</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Track Details Section -->
+        <section class="track-details-section" aria-label="Track information and controls">
+            <!-- Track Information -->
+            <div class="track-info-main">
+                <h2 id="trackArtistMain" class="track-artist-main">Shandi</h2>
+                <h3 id="trackArtistSub" class="track-artist-sub">Sinnamon</h3>
+                <h4 id="trackTitleMain" class="track-title-main">He's A Dream (1983)</h4>
+                <p id="trackAlbumMain" class="track-album-main">Flashdance (Original Motion Picture Soundtrack)</p>
+            </div>
+
+            <!-- Quality Information -->
+            <div class="quality-info" role="region" aria-label="Audio quality information">
+                <p class="quality-title">Source quality: <span id="sourceQuality">16-bit 44.1kHz</span></p>
+                <p class="quality-details">Stream quality: <span id="streamQuality">48kHz FLAC / HLS Lossless</span></p>
+            </div>
+
+            <!-- Rating Section -->
+            <div class="rating-section" role="region" aria-label="Song rating">
+                <p>Rate this track:</p>
+                <div class="rating-buttons" role="group" aria-label="Rating buttons">
+                    <button
+                        id="thumbsUp"
+                        class="rating-btn thumbs-up"
+                        title="I like this song"
+                        aria-label="Like this song"
+                    >
+                        👍
+                    </button>
+                    <button
+                        id="thumbsDown"
+                        class="rating-btn thumbs-down"
+                        title="I don't like this song"
+                        aria-label="Dislike this song"
+                    >
+                        👎
+                    </button>
+                </div>
+                <div class="rating-counts" aria-live="polite">
+                    <div class="rating-count up">
+                        👍 <span id="thumbsUpCount" aria-label="Number of likes">0</span>
+                    </div>
+                    <div class="rating-count down">
+                        👎 <span id="thumbsDownCount" aria-label="Number of dislikes">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Controls -->
+            <div class="player-controls" role="region" aria-label="Audio player controls">
+                <button id="playBtn" class="play-btn" aria-label="Play or pause audio">
+                    <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;" aria-hidden="true">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                </button>
+
+                <div class="time-info" aria-label="Playback time">
+                    <span id="elapsedTime" class="elapsed-time">0:35</span>
+                    <span>/ Live</span>
+                </div>
+
+                <div class="volume-control">
+                    <span class="volume-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                        </svg>
+                    </span>
+                    <input
+                        type="range"
+                        id="volumeSlider"
+                        class="volume-slider"
+                        min="0"
+                        max="100"
+                        value="70"
+                        aria-label="Volume control"
+                    >
+                </div>
+            </div>
+
+            <!-- Status Display -->
+            <div id="status" class="status" role="status" aria-live="polite">
+                Ready to play
+            </div>
+        </section>
+
+        <!-- Recent Tracks Section -->
+        <section class="footer-section" aria-label="Recently played tracks">
+            <div class="recent-tracks">
+                <h3 class="recent-tracks-title">Previous tracks:</h3>
+                <div id="recentTracksList" class="recent-tracks-list" role="list">
+                    <div class="recent-track" role="listitem" tabindex="0">
+                        <span class="recent-track-artist">TLC:</span>
+                        <span class="recent-track-title">Ain't 2 Proud 2 Beg</span>
+                    </div>
+                    <div class="recent-track" role="listitem" tabindex="0">
+                        <span class="recent-track-artist">The Raconteurs:</span>
+                        <span class="recent-track-title">Steady, As She Goes</span>
+                    </div>
+                    <div class="recent-track" role="listitem" tabindex="0">
+                        <span class="recent-track-artist">Mick Jagger:</span>
+                        <span class="recent-track-title">Just Another Night</span>
+                    </div>
+                    <div class="recent-track" role="listitem" tabindex="0">
+                        <span class="recent-track-artist">Beyoncé:</span>
+                        <span class="recent-track-title">Irreplaceable (Album Version)</span>
+                    </div>
+                    <div class="recent-track" role="listitem" tabindex="0">
+                        <span class="recent-track-artist">Etta James:</span>
+                        <span class="recent-track-title">I'd Rather Go Blind</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Hidden audio element -->
+    <audio id="audioPlayer" class="audio-player" aria-hidden="true"></audio>
+
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <!-- Application JavaScript (ES6 Modules) -->
+    <script type="module" src="js/app.js"></script>
+
+    <!-- Service Worker Registration (for PWA features) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('ServiceWorker registered successfully');
+                } catch (error) {
+                    console.log('ServiceWorker registration failed:', error);
+                }
+            });
+        }
+    </script>
+
+    <!-- Performance monitoring -->
+    <script>
+        // Basic performance monitoring
+        window.addEventListener('load', () => {
+            if (window.performance && window.performance.timing) {
+                const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+                console.log('Page load time:', loadTime + 'ms');
+            }
+        });
+    </script>
+</body>
+</html>
