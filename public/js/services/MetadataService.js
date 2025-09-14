@@ -141,16 +141,26 @@ export class MetadataService {
       
       // Check if values are valid numbers
       if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
-        this.appState.set('quality.source', this.formatQuality(bitDepth, sampleRate));
+        const formattedQuality = this.formatQuality(bitDepth, sampleRate);
+        this.appState.setBatch({
+          'quality.source': formattedQuality,
+          'quality.stream': formattedQuality
+        });
       } else {
         // Fallback when values are invalid
-        this.appState.set('quality.source', QUALITY_UNKNOWN_STATE);
+        this.appState.setBatch({
+          'quality.source': QUALITY_UNKNOWN_STATE,
+          'quality.stream': QUALITY_UNKNOWN_STATE
+        });
       }
     } else {
       // Fallback when no quality data is available
       // Only set to "Unknown" if we're still showing "Loading..."
       if (this.appState.get('quality.source') === QUALITY_LOADING_STATE) {
-        this.appState.set('quality.source', QUALITY_UNKNOWN_STATE);
+        this.appState.setBatch({
+          'quality.source': QUALITY_UNKNOWN_STATE,
+          'quality.stream': QUALITY_UNKNOWN_STATE
+        });
       }
     }
   }
