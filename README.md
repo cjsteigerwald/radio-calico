@@ -32,11 +32,25 @@ A modern internet radio streaming application with high-quality audio and intera
 
 ## Quick Start
 
-### Prerequisites
+### Docker Quick Start (Recommended)
+```bash
+# Clone repository
+git clone https://github.com/your-username/radiocalico.git
+cd radiocalico
+
+# Start with Docker
+make dev    # Development with hot-reload
+# OR
+make prod   # Production deployment
+```
+
+### Traditional Setup
+
+#### Prerequisites
 - Node.js 16+
 - npm
 
-### Installation
+#### Installation
 ```bash
 # Clone repository
 git clone https://github.com/your-username/radiocalico.git
@@ -115,8 +129,24 @@ radiocalico/
 
 ## Development
 
-### Commands
+### Quick Start with Docker
 ```bash
+# Development environment with hot-reload
+make dev
+
+# Production environment
+make prod
+
+# Run tests in container
+make test
+
+# View available commands
+make help
+```
+
+### Traditional Setup
+```bash
+npm install          # Install dependencies
 npm run dev          # Start with nodemon auto-reload
 npm start            # Production server
 npm test             # Run all test suites
@@ -124,7 +154,26 @@ npm run test:backend # Run backend tests only
 npm run test:frontend # Run frontend tests only
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
-npm install          # Install dependencies
+```
+
+### Docker Commands
+```bash
+# Build images
+docker build -t radiocalico:latest .                  # Production image
+docker-compose -f docker-compose.dev.yml build        # Development image
+
+# Run containers
+docker-compose -f docker-compose.dev.yml up           # Development mode
+docker-compose up -d                                  # Production mode
+
+# Container management
+docker-compose logs -f                                # View logs
+docker exec -it radiocalico-app sh                    # Shell access
+docker-compose down                                   # Stop containers
+
+# Database backup
+docker run --rm -v radiocalico_database:/data -v $(pwd):/backup alpine \
+  tar czf /backup/database-backup-$(date +%Y%m%d).tar.gz /data
 ```
 
 ### Environment Configuration
@@ -148,6 +197,36 @@ DATABASE_FILE=./database/radiocalico.db
 2. Create controller in `src/controllers/`
 3. Update model in `src/models/` if needed
 4. Follow MVC architecture patterns
+
+## Docker Support
+
+### Containerization Features
+- **Multi-stage builds** - Optimized production images (155MB)
+- **Development container** - Hot-reload and debugging support
+- **Production container** - Security-hardened with non-root user
+- **Docker Compose** - Orchestration for both dev and prod
+- **Health checks** - Built-in container health monitoring
+- **Volume persistence** - Database and logs persist across restarts
+
+### Container Management
+```bash
+# Using Makefile (recommended)
+make dev        # Start development
+make prod       # Start production
+make test       # Run tests
+make logs       # View logs
+make shell      # Container shell access
+make clean      # Remove containers
+
+# Using docker-compose directly
+docker-compose -f docker-compose.dev.yml up    # Development
+docker-compose up -d                           # Production
+docker-compose down                            # Stop
+```
+
+### Environment Files
+- `.env.docker.dev` - Development configuration
+- `.env.docker.prod` - Production configuration
 
 ## Progressive Web App
 

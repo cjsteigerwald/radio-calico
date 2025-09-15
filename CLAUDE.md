@@ -10,12 +10,21 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - Phase 1 (Backend Restructuring) completed ✅ - MVC architecture with comprehensive API
 - Phase 2 (Frontend Modularization) completed ✅ - Component-based architecture with ES6 modules
 - Testing Framework implemented ✅ - Jest unit testing for backend and frontend
+- Docker Containerization completed ✅ - Multi-stage builds with dev/prod configurations
 
-**Current Status**: Fully functional with modular backend, modern frontend architecture, PWA capabilities, comprehensive documentation, and unit testing framework with 100% test pass rate.
+**Current Status**: Fully functional with modular backend, modern frontend architecture, PWA capabilities, comprehensive documentation, unit testing framework with 100% test pass rate, and Docker containerization for self-contained deployment.
 
 ## Commands
 
-### Development
+### Docker Commands (Recommended)
+- `make dev` - Start development environment with hot-reload
+- `make prod` - Start production environment
+- `make test` - Run tests in Docker container
+- `make logs` - View container logs
+- `make shell` - Open shell in running container
+- `make clean` - Stop containers and remove images
+
+### Traditional Development
 - `npm start` - Start the production server (default port 3000, configurable via PORT env var)
 - `npm run dev` - Start the development server with auto-reload using nodemon
 
@@ -277,6 +286,26 @@ curl -X POST http://localhost:3000/api/songs/rate \
   -d '{"songId":"test123","artist":"Test","title":"Song","rating":1,"userIdentifier":"user123"}'
 ```
 
+## Docker Files
+
+### Container Configuration
+- **Dockerfile** - Multi-stage production build with Alpine Linux
+- **Dockerfile.dev** - Development container with hot-reload support
+- **docker-compose.yml** - Production orchestration configuration
+- **docker-compose.dev.yml** - Development orchestration with volume mounting
+- **.dockerignore** - Optimized build context exclusions
+- **.env.docker.dev** - Development environment variables
+- **.env.docker.prod** - Production environment variables
+- **Makefile** - Simplified container management commands
+
+### Container Features
+- Production image size: ~155MB
+- Non-root user execution (nodejs:1001)
+- Health check endpoint monitoring
+- SQLite database with volume persistence
+- Automatic container restart on failure
+- Log rotation and aggregation support
+
 ## Project Assets
 
 ### Style Guide
@@ -301,6 +330,16 @@ curl -X POST http://localhost:3000/api/songs/rate \
 - Service worker for offline support
 - Component communication system
 - Clean separation of concerns (20+ organized files)
+
+### ✅ Completed (Docker Containerization)
+- Multi-stage Dockerfile for optimized production images (155MB)
+- Separate development and production configurations
+- Docker Compose orchestration for both environments
+- Health checks and graceful shutdown handling
+- Volume persistence for database and logs
+- Non-root user security implementation
+- Makefile for simplified container management
+- Environment-specific configurations (.env.docker.dev/.prod)
 
 ### ✅ Completed (Testing Framework Implementation)
 - Jest testing framework for both backend and frontend

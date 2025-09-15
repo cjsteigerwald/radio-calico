@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: radiocalico:dev
+    container_name: radiocalico-dev
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Node.js debugging port
+    volumes:
+      - .:/app
+      - /app/node_modules  # Prevent overwriting node_modules
+      - ./database:/app/database
+    env_file:
+      - .env.docker.dev
+    environment:
+      - NODE_ENV=development
+      - DATABASE_FILE=/app/database/radiocalico.db
+      - LOG_LEVEL=debug
+      - ENABLE_REQUEST_LOGGING=true
+    command: npm run dev
+    networks:
+      - radiocalico-dev-network
+    stdin_open: true
+    tty: true
+
+networks:
+  radiocalico-dev-network:
+    driver: bridge
+    name: radiocalico-dev-network
