@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: radiocalico-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: radiocalico
+      POSTGRES_USER: radiocalico
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-radiocalico_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/001-create-schema.sql:/docker-entrypoint-initdb.d/001-create-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radiocalico -d radiocalico"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - radiocalico-network
+
+  # pgAdmin (optional, for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: radiocalico-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@radiocalico.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - radiocalico-network
+    profiles:
+      - tools
+
+  # RadioCalico Application with PostgreSQL
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        SKIP_TESTS: ${SKIP_TESTS:-false}
+    image: radiocalico:postgres
+    container_name: radiocalico-app-postgres
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      NODE_ENV: production
+      DATABASE_TYPE: postgres
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_DATABASE: radiocalico
+      PG_USER: radiocalico
+      PG_PASSWORD: ${PG_PASSWORD:-radiocalico_password}
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 30000
+      PG_CONNECTION_TIMEOUT: 2000
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - radiocalico-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis for session storage (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: radiocalico-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - radiocalico-network
+    profiles:
+      - cache
+
+networks:
+  radiocalico-network:
+    driver: bridge
+    name: radiocalico-postgres-network
+
+volumes:
+  postgres_data:
+    driver: local
+    name: radiocalico_postgres_data
+  pgadmin_data:
+    driver: local
+    name: radiocalico_pgadmin_data
+  redis_data:
+    driver: local
+    name: radiocalico_redis_data

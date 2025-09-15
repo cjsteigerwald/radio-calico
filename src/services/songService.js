@@ -1,4 +1,4 @@
-const database = require('../database/db');
+const Database = require('../database');
 
 class SongService {
   static validateRatingInput(songId, artist, title, userIdentifier, rating) {
@@ -34,19 +34,17 @@ class SongService {
     }
 
     try {
-      if (rating === 0) {
-        await database.removeSongRating(songId.trim(), userIdentifier.trim());
-      } else {
-        await database.rateSong(
-          songId.trim(),
-          artist.trim(),
-          title.trim(),
-          userIdentifier.trim(),
-          rating
-        );
-      }
+      // Use unified database interface that handles both SQLite and PostgreSQL
+      const result = await Database.rateSong(
+        songId.trim(),
+        userIdentifier.trim(),
+        artist.trim(),
+        title.trim(),
+        rating
+      );
 
-      const updatedRatings = await database.getSongRatings(songId.trim());
+      // Get updated ratings
+      const updatedRatings = await Database.getSongRatings(songId.trim());
       return updatedRatings;
     } catch (error) {
       throw error;
@@ -58,15 +56,17 @@ class SongService {
       throw new Error('Song ID is required');
     }
 
-    const ratings = await database.getSongRatings(songId.trim());
+    const ratings = await Database.getSongRatings(songId.trim());
     let userRating = null;
 
     if (userIdentifier && userIdentifier.trim().length > 0) {
-      userRating = await database.getUserSongRating(songId.trim(), userIdentifier.trim());
+      const userRatingData = await Database.getUserSongRating(songId.trim(), userIdentifier.trim());
+      userRating = userRatingData ? userRatingData.rating : null;
     }
 
     return {
-      ratings,
+      likes: ratings.likes || 0,
+      dislikes: ratings.dislikes || 0,
       userRating
     };
   }
