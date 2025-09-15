@@ -112,7 +112,12 @@ prune:
 # Check container health
 health:
 	@echo "Checking container health..."
-	@curl -f http://localhost:3000/api/health || echo "Health check failed"
+	@command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1 || { echo "curl or wget required but not installed"; exit 1; }
+	@if command -v curl >/dev/null 2>&1; then \
+		curl -f http://localhost:3000/api/health || echo "Health check failed"; \
+	else \
+		wget -q -O- http://localhost:3000/api/health || echo "Health check failed"; \
+	fi
 
 # Database backup
 backup-db:
