@@ -24,6 +24,14 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - `make shell` - Open shell in running container
 - `make clean` - Stop containers and remove images
 
+### PostgreSQL Commands
+- `make postgres` - Start PostgreSQL environment
+- `make postgres-up` - Start PostgreSQL in background
+- `make postgres-down` - Stop PostgreSQL environment
+- `make postgres-shell` - Open PostgreSQL CLI
+- `make migrate` - Migrate data from SQLite to PostgreSQL
+- `make pgadmin` - Start pgAdmin interface (port 5050)
+
 ### Traditional Development
 - `npm start` - Start the production server (default port 3000, configurable via PORT env var)
 - `npm run dev` - Start the development server with auto-reload using nodemon
@@ -78,11 +86,14 @@ The backend follows a modular MVC architecture with clear separation of concerns
   - **logging.js**: Request/response logging
   - **index.js**: Middleware exports
 
-- **src/database/db.js**: Data access layer
-  - SQLite operations for users and song ratings
+- **src/database/**: Data access layer
+  - **db.js**: SQLite operations for users and song ratings
+  - **postgres.js**: PostgreSQL connection pool and operations
+  - **index.js**: Unified database interface supporting both SQLite and PostgreSQL
   - Auto-creates database directory if missing (skipped for in-memory databases)
   - Database file location: `./database/radiocalico.db` (configurable via DATABASE_FILE env var)
   - Supports `:memory:` for in-memory SQLite database (used in testing)
+  - PostgreSQL support with connection pooling, UUID keys, JSONB columns
 
 ### Testing Framework
 The project includes a comprehensive unit testing framework using Jest:
@@ -214,7 +225,17 @@ The application uses centralized configuration with environment variable support
 - `PORT` - Server port (default: 3000)
 - `HOST` - Server host (default: localhost)
 - `NODE_ENV` - Environment mode (development/production/test)
+- `DATABASE_TYPE` - Database type: 'sqlite' or 'postgres' (default: sqlite)
 - `DATABASE_FILE` - SQLite database file path
+
+### PostgreSQL Variables (when DATABASE_TYPE=postgres)
+- `PG_HOST` - PostgreSQL host (default: localhost)
+- `PG_PORT` - PostgreSQL port (default: 5432)
+- `PG_DATABASE` - Database name (default: radiocalico)
+- `PG_USER` - Database user (default: radiocalico)
+- `PG_PASSWORD` - Database password
+- `PG_MAX_CONNECTIONS` - Connection pool size (default: 20)
+- `PG_SSL` - Enable SSL connection (default: false)
 
 ### Security & Performance
 - `ALLOWED_ORIGINS` - CORS allowed origins (comma-separated)
@@ -232,6 +253,8 @@ The application uses centralized configuration with environment variable support
 ### Production
 - express (v5.1.0) - Web framework
 - sqlite3 (v5.1.7) - SQLite database
+- pg (v8.x) - PostgreSQL client
+- pg-pool - PostgreSQL connection pooling
 - dotenv - Environment variable management
 - cors - CORS middleware
 - body-parser - Request body parsing
@@ -395,12 +418,16 @@ curl -X POST http://localhost:3000/api/songs/rate \
 - Automated optimization and bundling
 - Expand test coverage to integration and E2E tests
 
-#### Production Hardening (Proposed)
-- **Database**: Migrate from SQLite to PostgreSQL for enterprise scalability
-- **Web Server**: Implement nginx for reverse proxy and static file serving
-- **Security**: Add WAF, SSL/TLS, rate limiting, and DDoS protection
-- **High Availability**: Database replication, load balancing, clustering
-- **Performance**: Caching strategies, CDN integration, query optimization
+#### Production Hardening (In Progress)
+- **Database**: ✅ PostgreSQL migration implemented with dual database support
+  - Unified database interface for SQLite/PostgreSQL
+  - Connection pooling and optimized queries
+  - Migration scripts and data validation tools
+  - Docker Compose configuration for PostgreSQL stack
+- **Web Server**: Implement nginx for reverse proxy and static file serving (planned)
+- **Security**: Add WAF, SSL/TLS, rate limiting, and DDoS protection (planned)
+- **High Availability**: Database replication, load balancing, clustering (planned)
+- **Performance**: Caching strategies, CDN integration, query optimization (planned)
 - **Timeline**: 35-day implementation plan with 6 phases
 - **Target**: Support 10,000+ concurrent users with 99.9% uptime
 

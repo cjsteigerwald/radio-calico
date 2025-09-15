@@ -1,4 +1,4 @@
-const database = require('../database/db');
+const Database = require('../database');
 
 class UserService {
   static validateUserInput(username, email) {
@@ -31,10 +31,17 @@ class UserService {
     }
 
     try {
-      const userId = await database.createUser(username.trim(), email.trim().toLowerCase());
-      return { userId, message: 'User created successfully' };
+      const user = await Database.createUser(username.trim(), email.trim().toLowerCase());
+      return {
+        userId: user.id || user.userId,
+        username: user.username,
+        email: user.email,
+        message: 'User created successfully'
+      };
     } catch (error) {
-      if (error.message.includes('UNIQUE constraint failed')) {
+      // Handle both SQLite and PostgreSQL unique constraint errors
+      if (error.message.includes('UNIQUE constraint failed') ||
+          error.code === '23505') { // PostgreSQL unique violation
         throw new Error('Username or email already exists');
       }
       throw error;
@@ -42,8 +49,13 @@ class UserService {
   }
 
   static async getAllUsers() {
-    const users = await database.getAllUsers();
+    const users = await Database.getUsers();
     return users;
+  }
+
+  static async getUserByUsername(username) {
+    const user = await Database.getUserByUsername(username);
+    return user;
   }
 }
 

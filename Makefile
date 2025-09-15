@@ -24,6 +24,15 @@ help:
 	@echo "  make prod-build - Rebuild production image"
 	@echo "  make prod-logs  - Show production logs"
 	@echo "  make prod-shell - Open shell in prod container"
+	@echo ""
+	@echo "PostgreSQL Commands:"
+	@echo "  make postgres      - Start PostgreSQL environment"
+	@echo "  make postgres-up   - Start PostgreSQL in background"
+	@echo "  make postgres-down - Stop PostgreSQL environment"
+	@echo "  make postgres-logs - Show PostgreSQL logs"
+	@echo "  make postgres-shell - Open PostgreSQL shell"
+	@echo "  make migrate       - Run database migration from SQLite to PostgreSQL"
+	@echo "  make pgadmin       - Start pgAdmin interface (port 5050)"
 
 # Build production image
 build:
@@ -130,3 +139,34 @@ restore-db:
 	@echo "Restoring database from $(FILE)..."
 	docker run --rm -v radiocalico_database:/data -v $(PWD):/backup alpine \
 		tar xzf /backup/$(FILE) -C /
+
+# PostgreSQL Commands
+postgres:
+	docker-compose -f docker-compose.postgres.yml up
+
+postgres-up:
+	docker-compose -f docker-compose.postgres.yml up -d
+
+postgres-down:
+	docker-compose -f docker-compose.postgres.yml down
+
+postgres-logs:
+	docker-compose -f docker-compose.postgres.yml logs -f
+
+postgres-shell:
+	docker exec -it radiocalico-postgres psql -U radiocalico -d radiocalico
+
+postgres-build:
+	docker-compose -f docker-compose.postgres.yml build --no-cache
+
+pgadmin:
+	docker-compose -f docker-compose.postgres.yml --profile tools up pgadmin
+
+# Database migration from SQLite to PostgreSQL
+migrate:
+	@echo "Running database migration from SQLite to PostgreSQL..."
+	node scripts/migrate-to-postgres.js
+
+# Setup PostgreSQL locally (without Docker)
+setup-postgres:
+	./scripts/setup-postgres.sh

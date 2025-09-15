@@ -20,9 +20,10 @@ A modern internet radio streaming application with high-quality audio and intera
 
 ### Backend (Node.js/Express)
 - **MVC Architecture** - Clean separation of concerns
-- **SQLite Database** - Local data storage for ratings and tracks
+- **Dual Database Support** - SQLite for development, PostgreSQL for production
 - **RESTful API** - JSON endpoints for frontend integration
 - **CORS Enabled** - Cross-origin resource sharing support
+- **Connection Pooling** - Optimized PostgreSQL performance
 
 ### Frontend (Modular ES6)
 - **Component-Based CSS** - 11 modular CSS files with design system
@@ -54,7 +55,36 @@ make prod   # Production deployment
 open http://localhost:3000/radio-modular.html
 ```
 
-### Traditional Setup
+### PostgreSQL Setup (Production)
+
+#### Prerequisites
+- PostgreSQL 15+
+- Node.js 16+
+- npm
+
+#### Quick Start with Docker
+```bash
+# Start PostgreSQL
+make postgres-up
+
+# Run application with PostgreSQL
+DATABASE_TYPE=postgres npm start
+
+# Access pgAdmin (optional)
+make pgadmin
+# Open http://localhost:5050
+```
+
+#### Migration from SQLite
+```bash
+# Run migration script
+make migrate
+
+# Or manually
+node scripts/migrate-to-postgres.js
+```
+
+### Traditional Setup (SQLite)
 
 #### Prerequisites
 - Node.js 16+
@@ -176,6 +206,11 @@ docker-compose -f docker-compose.dev.yml build        # Development image
 docker-compose -f docker-compose.dev.yml up           # Development mode
 docker-compose up -d                                  # Production mode
 
+# PostgreSQL containers
+docker-compose -f docker-compose.postgres.yml up -d   # PostgreSQL stack
+make postgres-up                                      # Start PostgreSQL
+make postgres-shell                                   # PostgreSQL CLI
+
 # Container management
 docker-compose logs -f                                # View logs
 docker exec -it radiocalico-app sh                    # Shell access
@@ -191,7 +226,17 @@ Create `.env` file:
 ```env
 PORT=3000
 NODE_ENV=development
+
+# Database Configuration
+DATABASE_TYPE=sqlite  # or 'postgres' for PostgreSQL
 DATABASE_FILE=./database/radiocalico.db
+
+# PostgreSQL Configuration (if DATABASE_TYPE=postgres)
+PG_HOST=localhost
+PG_PORT=5432
+PG_DATABASE=radiocalico
+PG_USER=radiocalico
+PG_PASSWORD=radiocalico_password
 ```
 
 ### Adding New Features
