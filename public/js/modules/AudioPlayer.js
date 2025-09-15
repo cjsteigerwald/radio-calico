@@ -222,6 +222,16 @@ export class AudioPlayer {
   }
 
   /**
+   * Reset elapsed time counter for new track
+   */
+  resetElapsedTime() {
+    // Reset the start time to now
+    this.startTime = Date.now();
+    // Reset the displayed elapsed time
+    this.appState.set('audioPlayer.elapsedTime', 0);
+  }
+
+  /**
    * Stop elapsed time counter
    */
   stopElapsedTimeCounter() {

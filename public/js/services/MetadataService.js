@@ -284,9 +284,6 @@ export class MetadataService {
   onTrackChange(newTrack) {
     console.log('Track changed:', newTrack);
 
-    // Reset elapsed time when track changes
-    this.appState.set('audioPlayer.elapsedTime', 0);
-
     // Dispatch custom event for other modules
     const event = new CustomEvent('trackChanged', {
       detail: { track: newTrack }
