@@ -198,6 +198,14 @@ Implementation documentation:
 - Individual phase documentation for Phases 1-6
 - Phase 1 (Backend Restructuring) - ✅ Completed
 
+### Production Hardening Plan (kb/proposed/production-hardening/)
+- **README.md** - Overview and navigation for production hardening
+- **overview.md** - Executive summary, goals, architecture transformation
+- **postgresql-migration.md** - Complete PostgreSQL migration guide from SQLite
+- **nginx-configuration.md** - nginx setup for reverse proxy, SSL/TLS, WAF
+- **implementation-phases.md** - 35-day phased implementation timeline
+- **migration-scripts.md** - Production-ready migration scripts and tools
+
 ## Environment Configuration
 
 The application uses centralized configuration with environment variable support:
@@ -378,11 +386,22 @@ curl -X POST http://localhost:3000/api/songs/rate \
 - Updated .gitignore to exclude test artifacts
 - Created comprehensive testing fixes plan documentation
 
-### 📋 Next Phase (Phase 3 - Build Tooling & Modern Development)
+### 📋 Next Phases
+
+#### Phase 3 - Build Tooling & Modern Development
 - Vite build system with hot module replacement
 - ESLint, Prettier, and Stylelint for code quality
 - PostCSS for advanced CSS processing
 - Automated optimization and bundling
 - Expand test coverage to integration and E2E tests
 
-Refer to `kb/proposed/overview.md` for complete 8-phase roadmap.
+#### Production Hardening (Proposed)
+- **Database**: Migrate from SQLite to PostgreSQL for enterprise scalability
+- **Web Server**: Implement nginx for reverse proxy and static file serving
+- **Security**: Add WAF, SSL/TLS, rate limiting, and DDoS protection
+- **High Availability**: Database replication, load balancing, clustering
+- **Performance**: Caching strategies, CDN integration, query optimization
+- **Timeline**: 35-day implementation plan with 6 phases
+- **Target**: Support 10,000+ concurrent users with 99.9% uptime
+
+Refer to `kb/proposed/overview.md` for complete 8-phase roadmap and `kb/proposed/production-hardening/` for production deployment plan.
