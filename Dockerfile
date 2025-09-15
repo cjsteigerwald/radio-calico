@@ -30,9 +30,17 @@ RUN npm ci
 # Copy application source
 COPY . .
 
-# Run tests (optional - continue build even if tests fail)
-# This allows image building in CI/CD environments where tests may be run separately
-RUN npm test || echo "Warning: Tests failed but continuing build for development purposes"
+# Build argument to control test execution
+ARG SKIP_TESTS=false
+
+# Run tests conditionally based on build argument
+# Use SKIP_TESTS=true during development or when tests are run in CI separately
+RUN if [ "$SKIP_TESTS" = "true" ]; then \
+        echo "Skipping tests (SKIP_TESTS=true)"; \
+    else \
+        echo "Running tests..."; \
+        npm test || { echo "Tests failed! Build aborted."; exit 1; }; \
+    fi
 
 # Stage 3: Production
 FROM node:20-alpine AS production
