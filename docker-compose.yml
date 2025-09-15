@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: radiocalico:latest
+    container_name: radiocalico-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+    env_file:
+      - .env.docker.prod
+    environment:
+      - NODE_ENV=production
+      - DATABASE_FILE=/app/database/radiocalico.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - radiocalico-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  radiocalico-network:
+    driver: bridge
+    name: radiocalico-network
+
+volumes:
+  database:
+    driver: local
+  logs:
+    driver: local

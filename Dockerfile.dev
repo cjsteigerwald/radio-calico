@@ -1,0 +1,36 @@
+# Development Dockerfile for RadioCalico
+FROM node:20-alpine
+
+# Install development dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    sqlite \
+    git \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for development
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Copy package files with correct ownership
+COPY --chown=nodejs:nodejs package*.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install && \
+    chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port for development server
+EXPOSE 3000
+
+# Expose debug port for Node.js debugging
+EXPOSE 9229
+
+# Use nodemon for hot-reload in development
+CMD ["npm", "run", "dev"]

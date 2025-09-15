@@ -32,14 +32,38 @@ A modern internet radio streaming application with high-quality audio and intera
 
 ## Quick Start
 
-### Prerequisites
+### Docker Quick Start (Recommended)
+
+#### Prerequisites
+- Docker Desktop or Docker Engine
+- Docker Compose
+- Make (optional, for simplified commands)
+
+#### Quick Start
+```bash
+# Clone repository
+git clone https://github.com/cjsteigerwald/radio-calico.git
+cd radiocalico
+
+# Start with Docker
+make dev    # Development with hot-reload
+# OR
+make prod   # Production deployment
+
+# Access the application
+open http://localhost:3000/radio-modular.html
+```
+
+### Traditional Setup
+
+#### Prerequisites
 - Node.js 16+
 - npm
 
-### Installation
+#### Installation
 ```bash
 # Clone repository
-git clone https://github.com/your-username/radiocalico.git
+git clone https://github.com/cjsteigerwald/radio-calico.git
 cd radiocalico
 
 # Install dependencies
@@ -115,8 +139,24 @@ radiocalico/
 
 ## Development
 
-### Commands
+### Quick Start with Docker
 ```bash
+# Development environment with hot-reload
+make dev
+
+# Production environment
+make prod
+
+# Run tests in container
+make test
+
+# View available commands
+make help
+```
+
+### Traditional Setup
+```bash
+npm install          # Install dependencies
 npm run dev          # Start with nodemon auto-reload
 npm start            # Production server
 npm test             # Run all test suites
@@ -124,7 +164,26 @@ npm run test:backend # Run backend tests only
 npm run test:frontend # Run frontend tests only
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
-npm install          # Install dependencies
+```
+
+### Docker Commands
+```bash
+# Build images
+docker build -t radiocalico:latest .                  # Production image
+docker-compose -f docker-compose.dev.yml build        # Development image
+
+# Run containers
+docker-compose -f docker-compose.dev.yml up           # Development mode
+docker-compose up -d                                  # Production mode
+
+# Container management
+docker-compose logs -f                                # View logs
+docker exec -it radiocalico-app sh                    # Shell access
+docker-compose down                                   # Stop containers
+
+# Database backup
+docker run --rm -v radiocalico_database:/data -v $(pwd):/backup alpine \
+  tar czf /backup/database-backup-$(date +%Y%m%d).tar.gz /data
 ```
 
 ### Environment Configuration
@@ -148,6 +207,71 @@ DATABASE_FILE=./database/radiocalico.db
 2. Create controller in `src/controllers/`
 3. Update model in `src/models/` if needed
 4. Follow MVC architecture patterns
+
+## Docker Support
+
+### Containerization Features
+- **Multi-stage builds** - Optimized production images (155MB)
+- **Development container** - Hot-reload and debugging support
+- **Production container** - Security-hardened with non-root user
+- **Docker Compose** - Orchestration for both dev and prod
+- **Health checks** - Built-in container health monitoring
+- **Volume persistence** - Database and logs persist across restarts
+
+### Docker Images
+- **Base**: Node.js 20 Alpine Linux (minimal footprint)
+- **Production Size**: ~155MB
+- **Security**: Non-root user (nodejs:1001)
+- **Ports**: 3000 (app), 9229 (debug in dev)
+- **Volumes**: `/app/database`, `/app/logs`
+
+### Container Management
+```bash
+# Using Makefile (recommended)
+make dev        # Start development
+make prod       # Start production
+make test       # Run tests
+make logs       # View logs
+make shell      # Container shell access
+make clean      # Remove containers
+make health     # Check container health
+
+# Using docker-compose directly
+docker-compose -f docker-compose.dev.yml up    # Development
+docker-compose up -d                           # Production
+docker-compose down                            # Stop
+docker-compose ps                              # View running containers
+```
+
+### Environment Files
+- `.env.docker.dev` - Development configuration
+- `.env.docker.prod` - Production configuration (update ALLOWED_ORIGINS for your domain)
+
+### Troubleshooting Docker
+
+#### Container won't start
+```bash
+# Check logs
+docker-compose logs -f app
+
+# Rebuild image
+docker-compose build --no-cache
+```
+
+#### Permission issues
+```bash
+# Fix volume permissions
+docker exec radiocalico-app chown -R nodejs:nodejs /app/database
+```
+
+#### Port conflicts
+```bash
+# Check if port 3000 is in use
+lsof -i :3000
+
+# Use different port
+PORT=3001 docker-compose up
+```
 
 ## Progressive Web App
 
@@ -230,6 +354,41 @@ npm run test:frontend
 - **Testing Strategy** (`testing-strategy.md`) - Complete testing approach and guidelines
 - **Testing Framework** (`testing-framework-summary.md`) - Framework overview and setup
 - **Testing Fixes Plan** (`testing-critical-fixes-plan.md`) - Phase 1 critical fixes documentation
+
+## Deployment
+
+### Production Deployment with Docker
+
+#### Local Production
+```bash
+# Build and start production container
+make prod
+
+# Or manually
+docker-compose up -d
+```
+
+#### Cloud Deployment
+
+##### AWS ECS
+1. Push image to ECR
+2. Create ECS task definition
+3. Configure Application Load Balancer
+4. Set up auto-scaling
+
+##### Google Cloud Run
+1. Push image to Artifact Registry
+2. Deploy with `gcloud run deploy`
+3. Configure custom domain
+
+##### DigitalOcean App Platform
+1. Connect GitHub repository
+2. Select Dockerfile
+3. Configure environment variables
+4. Deploy
+
+#### SSL/TLS Configuration
+For production, use a reverse proxy (nginx, Traefik) or cloud load balancer for SSL termination.
 
 ## Contributing
 

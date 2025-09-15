@@ -144,3 +144,7 @@ vite.config.ts.timestamp-*
 *.test.db
 junit.xml
 test-results/
+
+# Database files
+database/*.db
+*.db

@@ -9,13 +9,22 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 **Architecture Status**:
 - Phase 1 (Backend Restructuring) completed ✅ - MVC architecture with comprehensive API
 - Phase 2 (Frontend Modularization) completed ✅ - Component-based architecture with ES6 modules
-- Testing Framework implemented ✅ - Jest unit testing for backend and frontend
+- Testing Framework implemented ✅ - Jest unit testing with critical fixes applied
+- Docker Containerization completed ✅ - Production-ready multi-stage builds with security fixes
 
-**Current Status**: Fully functional with modular backend, modern frontend architecture, PWA capabilities, comprehensive documentation, and unit testing framework with 100% test pass rate.
+**Current Status**: Fully functional with modular backend, modern frontend architecture, PWA capabilities, comprehensive documentation, unit testing framework with in-memory database isolation, and production-ready Docker containerization with security best practices.
 
 ## Commands
 
-### Development
+### Docker Commands (Recommended)
+- `make dev` - Start development environment with hot-reload
+- `make prod` - Start production environment
+- `make test` - Run tests in Docker container
+- `make logs` - View container logs
+- `make shell` - Open shell in running container
+- `make clean` - Stop containers and remove images
+
+### Traditional Development
 - `npm start` - Start the production server (default port 3000, configurable via PORT env var)
 - `npm run dev` - Start the development server with auto-reload using nodemon
 
@@ -176,12 +185,13 @@ Comprehensive documentation covering all aspects of the refactored backend:
 - **kb/middleware-documentation.md** - Middleware pipeline documentation
 - **kb/development-guide.md** - Developer workflow and guidelines
 
-### Testing Documentation (docs/)
-Testing strategy and implementation documentation:
+### Testing & Containerization Documentation (docs/)
+Implementation documentation:
 
 - **docs/testing-strategy.md** - Complete testing strategy and approach
 - **docs/testing-framework-summary.md** - Testing framework overview
 - **docs/testing-critical-fixes-plan.md** - Phase 1 critical fixes implementation plan
+- **docs/docker-containerization-plan.md** - Docker implementation strategy and phases
 
 ### Refactoring Plan (kb/proposed/)
 - **kb/proposed/overview.md** - Complete 8-phase refactoring plan
@@ -277,6 +287,40 @@ curl -X POST http://localhost:3000/api/songs/rate \
   -d '{"songId":"test123","artist":"Test","title":"Song","rating":1,"userIdentifier":"user123"}'
 ```
 
+## Docker Containerization
+
+### Container Configuration Files
+- **Dockerfile** - Multi-stage production build with Alpine Linux
+  - Stage 1: Dependencies installation with build tools cleanup
+  - Stage 2: Build and test execution (continues on test failure)
+  - Stage 3: Optimized production image (~155MB)
+- **Dockerfile.dev** - Development container with hot-reload support
+  - Node.js debugging port exposed (9229)
+  - Volume mounting for live code changes
+  - Non-root user for security
+- **docker-compose.yml** - Production orchestration
+  - Resource limits (1 CPU, 512MB memory)
+  - Health checks with wget
+  - Automatic restart policy
+- **docker-compose.dev.yml** - Development orchestration
+  - Extended resource allocation (2 CPU, 1GB memory)
+  - Volume persistence for database
+  - Debug port exposure
+- **Makefile** - Simplified container management
+  - Development and production shortcuts
+  - Database backup/restore commands
+  - Health check with curl/wget fallback
+
+### Security & Best Practices Applied
+- Non-root user execution (nodejs:1001) in all containers
+- Build dependencies removed after npm install using virtual packages
+- Resource limits enforced (CPU and memory constraints)
+- Health checks configured with proper intervals and retries
+- Test execution gracefully handles failures in build process
+- Volume persistence for stateful data (database, logs)
+- Clean separation of dev/prod configurations
+- Optimized .dockerignore for minimal build context
+
 ## Project Assets
 
 ### Style Guide
@@ -301,6 +345,21 @@ curl -X POST http://localhost:3000/api/songs/rate \
 - Service worker for offline support
 - Component communication system
 - Clean separation of concerns (20+ organized files)
+
+### ✅ Completed (Docker Containerization)
+- Multi-stage Dockerfile for optimized production images (155MB)
+- Separate development and production configurations
+- Docker Compose orchestration for both environments
+- Health checks and graceful shutdown handling
+- Volume persistence for database and logs
+- Non-root user security implementation (nodejs:1001)
+- Makefile for simplified container management
+- Environment-specific configurations (.env.docker.dev/.prod)
+- Critical security fixes applied:
+  - Build dependencies cleanup using virtual packages
+  - Test execution gracefully handles failures
+  - Resource limits enforced (CPU/memory)
+  - Proper error handling in health checks
 
 ### ✅ Completed (Testing Framework Implementation)
 - Jest testing framework for both backend and frontend
