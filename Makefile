@@ -1,5 +1,6 @@
 # RadioCalico Docker Makefile
 .PHONY: help build dev prod test clean logs shell stop restart
+.PHONY: test-all test-backend test-frontend test-watch test-coverage test-verbose
 
 # Default target
 help:
@@ -24,6 +25,20 @@ help:
 	@echo "  make prod-build - Rebuild production image"
 	@echo "  make prod-logs  - Show production logs"
 	@echo "  make prod-shell - Open shell in prod container"
+	@echo ""
+	@echo "Test Commands (Local):"
+	@echo "  make test-all      - Run all tests (backend + frontend)"
+	@echo "  make test-backend  - Run backend tests only"
+	@echo "  make test-frontend - Run frontend tests only"
+	@echo "  make test-watch    - Run tests in watch mode"
+	@echo "  make test-coverage - Generate test coverage report"
+	@echo "  make test-verbose  - Run tests with verbose output"
+	@echo ""
+	@echo "Test Commands (Docker):"
+	@echo "  make test-docker         - Run all tests in Docker"
+	@echo "  make test-docker-backend - Run backend tests in Docker"
+	@echo "  make test-docker-frontend- Run frontend tests in Docker"
+	@echo "  make test-docker-coverage- Generate coverage report in Docker"
 	@echo ""
 	@echo "PostgreSQL Commands:"
 	@echo "  make postgres      - Start PostgreSQL environment"
@@ -89,6 +104,52 @@ test:
 # Run tests in development container
 test-dev:
 	docker exec radiocalico-dev npm test
+
+# =================== Local Test Commands ===================
+# Run all tests locally (backend + frontend)
+test-all:
+	npm test
+
+# Run backend tests only
+test-backend:
+	npm run test:backend
+
+# Run frontend tests only
+test-frontend:
+	npm run test:frontend
+
+# Run tests in watch mode for development
+test-watch:
+	npm run test:watch
+
+# Generate test coverage report
+test-coverage:
+	npm run test:coverage
+
+# Run tests with verbose output
+test-verbose:
+	npm run test:verbose
+
+# =================== Docker Test Commands ===================
+# Run all tests in Docker container
+test-docker:
+	docker run --rm -v $(PWD):/app -w /app node:20-alpine npm test
+
+# Run backend tests in Docker
+test-docker-backend:
+	docker run --rm -v $(PWD):/app -w /app node:20-alpine npm run test:backend
+
+# Run frontend tests in Docker
+test-docker-frontend:
+	docker run --rm -v $(PWD):/app -w /app node:20-alpine npm run test:frontend
+
+# Generate coverage report in Docker
+test-docker-coverage:
+	docker run --rm -v $(PWD):/app -w /app node:20-alpine npm run test:coverage
+
+# Run tests in watch mode in Docker (useful for CI/CD)
+test-docker-watch:
+	docker run --rm -it -v $(PWD):/app -w /app node:20-alpine npm run test:watch
 
 # Clean up containers and images
 clean:
