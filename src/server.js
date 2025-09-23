@@ -11,8 +11,18 @@ const {
   validateRequestSize,
   requestLogger
 } = require('./middleware');
+const {
+  securityHeaders,
+  customSecurityHeaders,
+  apiLimiter,
+  sanitizeInput
+} = require('./middleware/security');
 
 const app = express();
+
+// Security headers - apply first
+app.use(securityHeaders);
+app.use(customSecurityHeaders);
 
 // Middleware setup
 if (config.logging.enableRequestLogging) {
@@ -24,6 +34,12 @@ app.use(validateRequestSize);
 app.use(validateContentType);
 app.use(bodyParser.json({ limit: config.security.maxRequestSize }));
 app.use(bodyParser.urlencoded({ extended: true, limit: config.security.maxRequestSize }));
+
+// Input sanitization
+app.use(sanitizeInput);
+
+// Apply rate limiting to API routes
+app.use('/api/', apiLimiter);
 
 // Static files
 app.use(express.static('public'));
