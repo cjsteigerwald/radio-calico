@@ -100,6 +100,8 @@ This document outlines the comprehensive security measures implemented in RadioC
   - Fast scanning (offline database)
   - Detailed vulnerability information
   - Support for multiple formats (table, JSON, SARIF)
+  - Graceful handling of missing Docker images
+  - Accurate vulnerability counting with jq support
 
 ## Security Testing Commands
 

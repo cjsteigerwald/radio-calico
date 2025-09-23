@@ -408,10 +408,17 @@ make trivy-scan      # Docker image vulnerability scanning
 ```bash
 # Install Trivy scanner
 brew install aquasecurity/trivy/trivy  # macOS
-curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Linux
+
+# For Linux - verify the script first for security:
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | less  # Review script
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Install
+
+# Optional: Install jq for better JSON parsing
+brew install jq  # macOS
+apt-get install jq  # Ubuntu/Debian
 
 # Scan Docker images
-make trivy-scan       # Detailed vulnerability report
+make trivy-scan       # Detailed vulnerability report (handles missing images gracefully)
 make security-docker  # Quick scan with auto-detection
 ```
 

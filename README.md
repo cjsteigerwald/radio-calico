@@ -231,9 +231,10 @@ make security-report-full # All scans with archive to docs/security-scans/
 #### Security Features
 - **Helmet.js** - Automatic security headers (CSP, X-Frame-Options, etc.)
 - **Rate Limiting** - DDoS and brute-force protection
-- **Input Sanitization** - XSS prevention middleware
+- **Input Sanitization** - XSS prevention with validator.js
 - **SAST** - ESLint security plugins for code analysis
-- **Secret Detection** - Prevents credential leaks
+- **Secret Detection** - Expanded patterns for GitHub, Slack, Google, Stripe tokens
+- **Container Scanning** - Trivy integration with 0 vulnerabilities
 
 See [Security Guide](docs/security-guide.md) for complete documentation.
 
