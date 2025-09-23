@@ -1,6 +1,7 @@
 # RadioCalico Docker Makefile
 .PHONY: help build dev prod test clean logs shell stop restart
 .PHONY: test-all test-backend test-frontend test-watch test-coverage test-verbose
+.PHONY: security security-audit security-fix security-docker scan-docker security-check
 
 # Default target
 help:
@@ -39,6 +40,14 @@ help:
 	@echo "  make test-docker-backend - Run backend tests in Docker"
 	@echo "  make test-docker-frontend- Run frontend tests in Docker"
 	@echo "  make test-docker-coverage- Generate coverage report in Docker"
+	@echo ""
+	@echo "Security Commands:"
+	@echo "  make security        - Run all security checks"
+	@echo "  make security-audit  - Run npm audit to check for vulnerabilities"
+	@echo "  make security-fix    - Auto-fix npm vulnerabilities (use with caution)"
+	@echo "  make security-docker - Scan Docker images for vulnerabilities"
+	@echo "  make scan-docker     - Scan running containers for security issues"
+	@echo "  make security-check  - Detailed security audit with JSON output"
 	@echo ""
 	@echo "PostgreSQL Commands:"
 	@echo "  make postgres      - Start PostgreSQL environment"
@@ -150,6 +159,72 @@ test-docker-coverage:
 # Run tests in watch mode in Docker (useful for CI/CD)
 test-docker-watch:
 	docker run --rm -it -v $(PWD):/app -w /app node:20-alpine npm run test:watch
+
+# =================== Security Commands ===================
+# Run all security checks
+security: security-audit security-docker
+	@echo "✅ All security checks completed"
+
+# Run npm audit to check for vulnerabilities
+security-audit:
+	@echo "🔍 Running npm security audit..."
+	npm audit
+
+# Run npm audit with JSON output for CI/CD integration
+security-check:
+	@echo "🔍 Running detailed security audit..."
+	npm audit --json > security-report.json || true
+	@echo "📊 Security report saved to security-report.json"
+	@npm audit || true
+
+# Auto-fix npm vulnerabilities (use with caution)
+security-fix:
+	@echo "🔧 Attempting to auto-fix vulnerabilities..."
+	npm audit fix
+	@echo "⚠️  Remember to test your application after fixing vulnerabilities"
+
+# Force fix npm vulnerabilities (use with extreme caution)
+security-fix-force:
+	@echo "⚠️  Force fixing vulnerabilities (may introduce breaking changes)..."
+	npm audit fix --force
+	@echo "❗ Critical: Test your application thoroughly after force fixing"
+
+# Scan Docker images for vulnerabilities using native Docker scan
+security-docker:
+	@echo "🐳 Scanning Docker images for vulnerabilities..."
+	@echo "Scanning production image..."
+	-docker scout cves radiocalico:latest 2>/dev/null || docker scan radiocalico:latest 2>/dev/null || echo "Docker scan not available. Install docker-scan plugin or Docker Desktop"
+	@echo ""
+	@echo "Scanning development image..."
+	-docker scout cves radiocalico:dev 2>/dev/null || docker scan radiocalico:dev 2>/dev/null || echo "Docker scan not available. Install docker-scan plugin or Docker Desktop"
+
+# Scan running containers for security issues
+scan-docker:
+	@echo "🔍 Scanning running containers..."
+	@docker ps --format "table {{.Names}}\t{{.Image}}" | grep radiocalico | while read name image; do \
+		echo "Scanning container: $$name"; \
+		docker exec $$name sh -c "npm audit || true" 2>/dev/null || echo "Container $$name not running or npm not available"; \
+	done
+
+# Check for outdated dependencies (security relevant)
+security-outdated:
+	@echo "📦 Checking for outdated dependencies..."
+	npm outdated || true
+
+# Run security audit in Docker container (for CI/CD)
+security-docker-audit:
+	@echo "🐳 Running security audit in Docker container..."
+	docker run --rm -v $(PWD):/app -w /app node:20-alpine npm audit
+
+# Generate security report with severity levels
+security-report:
+	@echo "📊 Generating comprehensive security report..."
+	@echo "=== NPM Security Audit ===" > security-full-report.txt
+	npm audit >> security-full-report.txt 2>&1 || true
+	@echo "" >> security-full-report.txt
+	@echo "=== Outdated Dependencies ===" >> security-full-report.txt
+	npm outdated >> security-full-report.txt 2>&1 || true
+	@echo "✅ Full security report saved to security-full-report.txt"
 
 # Clean up containers and images
 clean:

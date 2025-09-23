@@ -44,6 +44,16 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - `npm run test:coverage` - Generate test coverage report
 - `npm run test:verbose` - Run tests with verbose output
 
+### Security Scanning
+- `make security` - Run all security checks (npm audit + Docker scans)
+- `make security-audit` - Run npm audit to check for vulnerabilities
+- `make security-fix` - Auto-fix npm vulnerabilities (use with caution)
+- `make security-docker` - Scan Docker images for vulnerabilities
+- `make scan-docker` - Scan running containers for security issues
+- `make security-check` - Generate detailed security audit with JSON output
+- `make security-report` - Generate comprehensive security report
+- `make security-outdated` - Check for outdated dependencies
+
 ### Installation
 - `npm install` - Install all dependencies
 

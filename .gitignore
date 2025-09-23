@@ -145,6 +145,14 @@ vite.config.ts.timestamp-*
 junit.xml
 test-results/
 
+# Security reports
+security-report.json
+security-full-report.txt
+security-*.json
+security-*.txt
+npm-audit.json
+vulnerability-report.*
+
 # Database files
 database/*.db
 *.db

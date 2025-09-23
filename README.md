@@ -196,6 +196,16 @@ npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
 ```
 
+### Security Scanning
+```bash
+make security        # Run all security checks
+make security-audit  # Check for npm vulnerabilities
+make security-fix    # Auto-fix vulnerabilities (use with caution)
+make security-docker # Scan Docker images
+make security-report # Generate comprehensive security report
+make security-check  # Generate JSON report for CI/CD
+```
+
 ### Docker Commands
 ```bash
 # Build images
