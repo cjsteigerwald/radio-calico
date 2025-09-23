@@ -4,6 +4,7 @@
 .PHONY: security security-prereq security-quick security-audit security-audit-critical security-audit-high
 .PHONY: security-fix security-fix-force security-docker scan-docker security-check security-outdated
 .PHONY: security-docker-audit security-report security-report-full security-metrics
+.PHONY: test-save test-report
 .PHONY: security-sast security-lint security-secrets security-headers security-test security-full
 
 # Default target
@@ -37,6 +38,8 @@ help:
 	@echo "  make test-watch    - Run tests in watch mode"
 	@echo "  make test-coverage - Generate test coverage report"
 	@echo "  make test-verbose  - Run tests with verbose output"
+	@echo "  make test-save     - Run tests and save to docs/test-results"
+	@echo "  make test-report   - Run coverage and save to docs/test-results"
 	@echo ""
 	@echo "Test Commands (Docker):"
 	@echo "  make test-docker         - Run all tests in Docker"
@@ -178,6 +181,20 @@ test-docker-coverage:
 test-docker-watch:
 	docker run --rm -it -v $(PWD):/app -w /app node:20-alpine npm run test:watch
 
+# Run tests and save results to docs
+test-save:
+	@echo "🧪 Running tests and saving results..."
+	@mkdir -p docs/test-results
+	npm test > docs/test-results/test-output-$$(date +%Y%m%d-%H%M%S).txt 2>&1
+	@echo "✅ Test results saved to docs/test-results/"
+
+# Run tests with coverage and save report
+test-report:
+	@echo "📊 Running tests with coverage..."
+	@mkdir -p docs/test-results
+	npm run test:coverage > docs/test-results/coverage-$$(date +%Y%m%d-%H%M%S).txt 2>&1
+	@echo "✅ Coverage report saved to docs/test-results/"
+
 # =================== Security Commands ===================
 # Check security prerequisites
 security-prereq:
@@ -295,6 +312,7 @@ security-report:
 # Generate comprehensive security report with all scan outputs
 security-report-full:
 	@echo "📊 Generating comprehensive security report with all scans..."
+	@mkdir -p docs/security-scans
 	@echo "=== COMPREHENSIVE SECURITY REPORT ===" > security-full-report.txt
 	@echo "Generated: $$(date)" >> security-full-report.txt
 	@echo "========================================" >> security-full-report.txt
@@ -338,6 +356,8 @@ security-report-full:
 	@echo "Report completed: $$(date)" >> security-full-report.txt
 	@echo "For detailed metrics run: make security-metrics" >> security-full-report.txt
 	@echo "✅ Comprehensive security report saved to security-full-report.txt"
+	@cp security-full-report.txt "docs/security-scans/security-scan-$$(date +%Y%m%d-%H%M%S).txt"
+	@echo "📁 Report archived in docs/security-scans/"
 
 # Track security metrics and trends
 security-metrics:
