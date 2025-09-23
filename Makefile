@@ -1,6 +1,9 @@
 # RadioCalico Docker Makefile
 .PHONY: help build dev prod test clean logs shell stop restart
 .PHONY: test-all test-backend test-frontend test-watch test-coverage test-verbose
+.PHONY: security security-prereq security-quick security-audit security-audit-critical security-audit-high
+.PHONY: security-fix security-fix-force security-docker scan-docker security-check security-outdated
+.PHONY: security-docker-audit security-report security-metrics
 
 # Default target
 help:
@@ -39,6 +42,21 @@ help:
 	@echo "  make test-docker-backend - Run backend tests in Docker"
 	@echo "  make test-docker-frontend- Run frontend tests in Docker"
 	@echo "  make test-docker-coverage- Generate coverage report in Docker"
+	@echo ""
+	@echo "Security Commands:"
+	@echo "  make security              - Run all security checks"
+	@echo "  make security-prereq       - Check security scan prerequisites"
+	@echo "  make security-quick        - Quick scan (high severity only)"
+	@echo "  make security-audit        - Check for all vulnerabilities"
+	@echo "  make security-audit-critical - Check for critical vulnerabilities only"
+	@echo "  make security-audit-high   - Check for high+ severity vulnerabilities"
+	@echo "  make security-fix          - Auto-fix vulnerabilities (use with caution)"
+	@echo "  make security-fix-force    - Force fix with confirmation (may break)"
+	@echo "  make security-docker       - Scan Docker images for vulnerabilities"
+	@echo "  make scan-docker           - Scan running containers"
+	@echo "  make security-check        - Generate JSON report for CI/CD"
+	@echo "  make security-report       - Generate comprehensive text report"
+	@echo "  make security-metrics      - Track security metrics (requires jq)"
 	@echo ""
 	@echo "PostgreSQL Commands:"
 	@echo "  make postgres      - Start PostgreSQL environment"
@@ -150,6 +168,137 @@ test-docker-coverage:
 # Run tests in watch mode in Docker (useful for CI/CD)
 test-docker-watch:
 	docker run --rm -it -v $(PWD):/app -w /app node:20-alpine npm run test:watch
+
+# =================== Security Commands ===================
+# Check security prerequisites
+security-prereq:
+	@echo "🔍 Checking security scan prerequisites..."
+	@command -v npm >/dev/null 2>&1 || (echo "❌ npm is required" && exit 1)
+	@command -v docker >/dev/null 2>&1 || echo "⚠️  docker is optional but recommended for container scanning"
+	@command -v jq >/dev/null 2>&1 || echo "⚠️  jq is optional but required for security-metrics"
+	@echo "✅ Prerequisites check complete"
+
+# Quick security scan for development
+security-quick:
+	@echo "⚡ Running quick security scan (high severity only)..."
+	npm audit --audit-level=high
+	@echo "✅ Quick scan complete"
+
+# Run all security checks
+security: security-prereq security-audit security-docker
+	@echo "✅ All security checks completed"
+
+# Run npm audit to check for vulnerabilities
+security-audit:
+	@echo "🔍 Running npm security audit..."
+	npm audit
+
+# Run npm audit with severity filtering
+security-audit-critical:
+	@echo "🚨 Checking for critical vulnerabilities..."
+	npm audit --audit-level=critical
+
+security-audit-high:
+	@echo "⚠️  Checking for high and critical vulnerabilities..."
+	npm audit --audit-level=high
+
+# Run npm audit with JSON output for CI/CD integration
+security-check:
+	@echo "🔍 Running detailed security audit..."
+	npm audit --json > security-report.json || true
+	@echo "📊 Security report saved to security-report.json"
+	@npm audit || true
+
+# Auto-fix npm vulnerabilities (use with caution)
+security-fix:
+	@echo "🔧 Attempting to auto-fix vulnerabilities..."
+	npm audit fix
+	@echo "⚠️  Remember to test your application after fixing vulnerabilities"
+
+# Force fix npm vulnerabilities (use with extreme caution)
+security-fix-force:
+	@echo "⚠️  WARNING: Force fixing vulnerabilities may introduce breaking changes!"
+	@echo "Are you sure you want to continue? [y/N]"
+	@read confirm && [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ] || (echo "Aborted." && exit 1)
+	@echo "🔧 Force fixing vulnerabilities..."
+	npm audit fix --force
+	@echo "❗ Critical: Test your application thoroughly after force fixing"
+
+# Scan Docker images for vulnerabilities using native Docker scan
+security-docker:
+	@echo "🐳 Detecting available Docker security scanner..."
+	@if command -v docker scout >/dev/null 2>&1; then \
+		echo "✅ Using Docker Scout for vulnerability scanning"; \
+		echo "Scanning production image..."; \
+		docker scout cves radiocalico:latest 2>/dev/null || echo "Production image not found"; \
+		echo ""; \
+		echo "Scanning development image..."; \
+		docker scout cves radiocalico:dev 2>/dev/null || echo "Development image not found"; \
+	elif docker scan --version >/dev/null 2>&1; then \
+		echo "✅ Using Docker Scan (Snyk) for vulnerability scanning"; \
+		echo "Scanning production image..."; \
+		docker scan radiocalico:latest 2>/dev/null || echo "Production image not found"; \
+		echo ""; \
+		echo "Scanning development image..."; \
+		docker scan radiocalico:dev 2>/dev/null || echo "Development image not found"; \
+	else \
+		echo "❌ No Docker security scanner found."; \
+		echo "Install Docker Desktop or docker-scan plugin for vulnerability scanning."; \
+	fi
+
+# Scan running containers for security issues
+scan-docker:
+	@echo "🔍 Checking for running RadioCalico containers..."
+	@if docker ps --format "{{.Names}}" | grep -q radiocalico; then \
+		echo "Found running containers. Starting security scan..."; \
+		docker ps --format "table {{.Names}}\t{{.Image}}" | grep radiocalico | while read name image; do \
+			echo "Scanning container: $$name"; \
+			docker exec $$name sh -c "npm audit || true" 2>/dev/null || echo "Container $$name not accessible"; \
+		done; \
+	else \
+		echo "❌ No RadioCalico containers are currently running."; \
+		echo "Start containers with 'make dev' or 'make prod' first."; \
+	fi
+
+# Check for outdated dependencies (security relevant)
+security-outdated:
+	@echo "📦 Checking for outdated dependencies..."
+	npm outdated || true
+
+# Run security audit in Docker container (for CI/CD)
+security-docker-audit:
+	@echo "🐳 Running security audit in Docker container..."
+	docker run --rm -v $(PWD):/app -w /app node:20-alpine npm audit
+
+# Generate security report with severity levels
+security-report:
+	@echo "📊 Generating comprehensive security report..."
+	@echo "=== NPM Security Audit ===" > security-full-report.txt
+	npm audit >> security-full-report.txt 2>&1 || true
+	@echo "" >> security-full-report.txt
+	@echo "=== Outdated Dependencies ===" >> security-full-report.txt
+	npm outdated >> security-full-report.txt 2>&1 || true
+	@echo "✅ Full security report saved to security-full-report.txt"
+
+# Track security metrics and trends
+security-metrics:
+	@echo "📈 Generating security metrics..."
+	@which jq >/dev/null 2>&1 || (echo "❌ Error: jq is required for security metrics. Install with: brew install jq (macOS) or apt-get install jq (Linux)" && exit 1)
+	@echo "=== Security Metrics Report ===" > security-metrics.txt
+	@echo "Generated: $$(date)" >> security-metrics.txt
+	@echo "" >> security-metrics.txt
+	@echo "=== Vulnerability Summary ===" >> security-metrics.txt
+	@npm audit --json 2>/dev/null | jq -r '.metadata | "Total Dependencies: \(.dependencies)\nTotal Dev Dependencies: \(.devDependencies)\nTotal Optional: \(.optionalDependencies // 0)\nVulnerabilities Found: \(.vulnerabilities.total // 0)\nCritical: \(.vulnerabilities.critical // 0)\nHigh: \(.vulnerabilities.high // 0)\nModerate: \(.vulnerabilities.moderate // 0)\nLow: \(.vulnerabilities.low // 0)"' >> security-metrics.txt 2>/dev/null || echo "No vulnerability data available" >> security-metrics.txt
+	@echo "" >> security-metrics.txt
+	@echo "=== Outdated Packages Count ===" >> security-metrics.txt
+	@npm outdated --json 2>/dev/null | jq -r 'length' >> security-metrics.txt 2>/dev/null || echo "0" >> security-metrics.txt
+	@echo "" >> security-metrics.txt
+	@echo "=== License Summary ===" >> security-metrics.txt
+	@npm ls --json --depth=0 2>/dev/null | jq -r '.dependencies | to_entries | map("\(.key): \(.value.license // "UNKNOWN")") | .[]' >> security-metrics.txt 2>/dev/null || echo "License data not available" >> security-metrics.txt
+	@echo "✅ Security metrics saved to security-metrics.txt"
+	@echo ""
+	@echo "📊 Quick Summary:"
+	@npm audit 2>/dev/null | grep -E "found|Severity:" || echo "No vulnerabilities found"
 
 # Clean up containers and images
 clean:

@@ -343,6 +343,56 @@ if (metadata.bit_depth && metadata.sample_rate) {
 }
 ```
 
+## Security Best Practices
+
+### Regular Security Audits
+Run security audits regularly during development:
+
+```bash
+# Check for vulnerabilities
+make security-audit
+
+# Generate detailed report
+make security-report
+
+# Check outdated dependencies
+make security-outdated
+
+# Fix vulnerabilities (review changes carefully)
+make security-fix
+```
+
+### Docker Security Scanning
+Scan Docker images before deployment:
+
+```bash
+# Scan all images
+make security-docker
+
+# Scan running containers
+make scan-docker
+```
+
+### CI/CD Integration
+Generate JSON reports for automated pipelines:
+
+```bash
+# Generate JSON security report
+make security-check
+
+# Run in Docker for consistent environment
+make security-docker-audit
+```
+
+### Security Checklist
+- [ ] Run `make security-audit` before commits
+- [ ] Review and fix vulnerabilities with `make security-fix`
+- [ ] Scan Docker images with `make security-docker`
+- [ ] Check for outdated dependencies monthly
+- [ ] Never commit sensitive data or API keys
+- [ ] Use environment variables for configuration
+- [ ] Keep dependencies up to date
+
 ## Testing Guidelines
 
 ### Test Structure
