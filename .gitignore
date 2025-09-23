@@ -148,6 +148,7 @@ test-results/
 # Security reports
 security-report.json
 security-full-report.txt
+security-metrics.txt
 security-*.json
 security-*.txt
 npm-audit.json
