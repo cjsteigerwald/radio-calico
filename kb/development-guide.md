@@ -345,68 +345,159 @@ if (metadata.bit_depth && metadata.sample_rate) {
 
 ## Security Best Practices
 
-### Regular Security Audits
-Run security audits regularly during development:
+### Comprehensive Security Testing
+RadioCalico implements defense-in-depth security beyond npm audit:
 
+#### 1. Dependency Security
 ```bash
-# Check for vulnerabilities
-make security-audit
-
-# Generate detailed report
-make security-report
-
-# Check outdated dependencies
-make security-outdated
-
-# Fix vulnerabilities (review changes carefully)
-make security-fix
+make security-audit          # Check all vulnerabilities
+make security-audit-critical # Critical only
+make security-audit-high     # High and critical
+make security-fix            # Auto-fix (review carefully)
+make security-outdated       # Check outdated packages
 ```
 
-### Docker Security Scanning
-Scan Docker images before deployment:
-
+#### 2. Static Application Security Testing (SAST)
 ```bash
-# Scan all images
-make security-docker
-
-# Scan running containers
-make scan-docker
+make security-sast    # Complete SAST analysis
+make security-lint    # ESLint security checks
+npm run lint:security # Direct security linting
 ```
 
-### CI/CD Integration
-Generate JSON reports for automated pipelines:
+Detects:
+- SQL/NoSQL injection vulnerabilities
+- Cross-site scripting (XSS) risks
+- Unsafe regex patterns
+- Eval and dangerous function usage
+- Path traversal vulnerabilities
 
+#### 3. Secret Detection
 ```bash
-# Generate JSON security report
-make security-check
+make security-secrets # Scan for hardcoded secrets
+```
 
-# Run in Docker for consistent environment
-make security-docker-audit
+Prevents:
+- API keys in code
+- Hardcoded passwords
+- Private keys
+- Authentication tokens
+- Database credentials
+
+#### 4. Security Headers Validation
+```bash
+make security-headers # Test HTTP security headers
+```
+
+Validates:
+- Content-Security-Policy (CSP)
+- X-Frame-Options (clickjacking)
+- X-Content-Type-Options (MIME sniffing)
+- X-XSS-Protection
+- Strict-Transport-Security (HSTS)
+- Referrer-Policy
+- Permissions-Policy
+
+#### 5. Full Security Assessment
+```bash
+make security-quick  # Quick high-severity scan
+make security-full   # Complete security assessment
+```
+
+### Security Implementation Details
+
+#### Rate Limiting
+Configured in `src/middleware/security.js`:
+- General API: 100 requests/15 minutes
+- Authentication: 5 attempts/15 minutes
+- Song rating: 10 requests/minute
+
+#### Input Sanitization
+Automatic XSS prevention:
+- Removes script tags
+- Strips JavaScript URIs
+- Removes event handlers
+- Sanitizes all request inputs
+
+#### Security Headers (Helmet.js)
+Automatically applied to all responses with proper CSP configuration for the application.
+
+### Security Development Workflow
+
+#### Before Every Commit
+```bash
+make security-quick   # Quick vulnerability check
+make security-secrets # Ensure no secrets
+make test-save       # Run tests and archive results
+git add . && git commit
+```
+
+#### Daily Development
+```bash
+make security-sast    # Static analysis
+make security-headers # Verify headers
+npm run lint:fix      # Fix linting issues
+```
+
+#### Weekly Review
+```bash
+make security-full           # Complete assessment
+cat security-metrics.txt     # Review metrics
+make security-report-full    # Generate comprehensive report
+# Reports saved to docs/security-scans/
 ```
 
 ### Security Checklist
-- [ ] Run `make security-audit` before commits
-- [ ] Review and fix vulnerabilities with `make security-fix`
-- [ ] Scan Docker images with `make security-docker`
-- [ ] Check for outdated dependencies monthly
-- [ ] Never commit sensitive data or API keys
-- [ ] Use environment variables for configuration
-- [ ] Keep dependencies up to date
+- [ ] Run `make security-quick` before commits
+- [ ] No secrets in code (use `.env` files)
+- [ ] All inputs are sanitized
+- [ ] Rate limiting on sensitive endpoints
+- [ ] Security headers enabled
+- [ ] Dependencies updated regularly
+- [ ] SAST checks passing
+- [ ] Docker images scanned
 
 ## Testing Guidelines
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode for development
+npm run test:watch
+
+# Backend tests only
+npm run test:backend
+
+# Frontend tests only
+npm run test:frontend
+
+# Run tests and save results for documentation
+make test-save       # Saves results to docs/test-results/
+make test-report     # Generate coverage report and save
+```
 
 ### Test Structure
 ```
 tests/
-├── unit/              # Unit tests for individual components
-│   ├── services/      # Service layer tests
-│   ├── controllers/   # Controller tests
-│   └── middleware/    # Middleware tests
-├── integration/       # Integration tests
-│   ├── api/          # API endpoint tests
-│   └── database/     # Database tests
-├── e2e/              # End-to-end tests
-└── helpers/          # Test utilities and fixtures
+├── backend/           # Backend test suites
+│   ├── unit/         # Unit tests for services, controllers, middleware
+│   └── integration/  # Integration tests (planned)
+├── frontend/         # Frontend test suites
+│   ├── unit/         # Unit tests for modules and utilities
+│   └── mocks/        # Mock handlers and style mocks
+├── setup/            # Test configuration files
+│   ├── backend.setup.js
+│   └── frontend.setup.js
+
+docs/
+├── test-results/     # Archived test execution reports
+│   └── test-run-YYYYMMDD-HHMMSS.txt
+└── security-scans/   # Archived security scan reports
+    └── security-scan-YYYYMMDD-HHMMSS.txt
 ```
 
 ### Unit Testing Examples

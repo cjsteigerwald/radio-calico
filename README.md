@@ -15,6 +15,7 @@ A modern internet radio streaming application with high-quality audio and intera
 - **Progressive Web App** - Offline support and installable experience
 - **Mobile Responsive** - Optimized for all device sizes
 - **Accessibility Compliant** - WCAG 2.1 AA standards
+- **Enterprise Security** - Multi-layered security with OWASP Top 10 protection
 
 ## Architecture
 
@@ -145,7 +146,10 @@ radiocalico/
 │   └── setup/             # Test configuration
 ├── docs/                  # Project documentation
 │   ├── testing-strategy.md
-│   └── testing-framework-summary.md
+│   ├── testing-framework-summary.md
+│   ├── security-guide.md
+│   ├── test-results/      # Test execution logs
+│   └── security-scans/    # Security scan archives
 ├── kb/                    # Knowledge base
 │   ├── frontend-architecture.md
 │   ├── backend-architecture.md
@@ -194,17 +198,43 @@ npm run test:backend # Run backend tests only
 npm run test:frontend # Run frontend tests only
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
+
+# Save test results for tracking
+make test-save       # Run tests and archive results
+make test-report     # Generate coverage and archive
 ```
 
-### Security Scanning
+### Security Testing
+
+#### Comprehensive Security Suite
+RadioCalico implements multi-layered security testing beyond traditional dependency scanning:
+
 ```bash
-make security        # Run all security checks
-make security-audit  # Check for npm vulnerabilities
-make security-fix    # Auto-fix vulnerabilities (use with caution)
-make security-docker # Scan Docker images
-make security-report # Generate comprehensive security report
-make security-check  # Generate JSON report for CI/CD
+# Quick security check
+make security-quick  # High severity vulnerabilities only
+
+# Full security assessment
+make security-full   # Complete security testing suite
+
+# Individual security tests
+make security        # Dependency vulnerabilities
+make security-sast   # Static application security testing
+make security-lint   # Code vulnerability analysis
+make security-secrets # Hardcoded secrets detection
+make security-headers # HTTP security headers validation
+
+# Generate comprehensive reports
+make security-report-full # All scans with archive to docs/security-scans/
 ```
+
+#### Security Features
+- **Helmet.js** - Automatic security headers (CSP, X-Frame-Options, etc.)
+- **Rate Limiting** - DDoS and brute-force protection
+- **Input Sanitization** - XSS prevention middleware
+- **SAST** - ESLint security plugins for code analysis
+- **Secret Detection** - Prevents credential leaks
+
+See [Security Guide](docs/security-guide.md) for complete documentation.
 
 ### Docker Commands
 ```bash
