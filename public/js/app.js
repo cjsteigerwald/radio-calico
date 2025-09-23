@@ -189,8 +189,8 @@ class RadioCalicoApp {
     // Track change events
     document.addEventListener('trackChanged', (event) => {
       this.ratingSystem.onTrackChange();
-      // Reset elapsed time when track changes
-      if (this.audioPlayer && !this.audioPlayer.audioElement.paused) {
+      // Reset elapsed time when track changes (regardless of play state)
+      if (this.audioPlayer) {
         this.audioPlayer.resetElapsedTime();
       }
     });

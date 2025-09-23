@@ -10,6 +10,7 @@ export class AudioPlayer {
     this.hls = null;
     this.elapsedTimeInterval = null;
     this.startTime = Date.now();
+    this.pausedTime = 0;  // Track accumulated paused time
 
     this.init();
   }
@@ -213,11 +214,24 @@ export class AudioPlayer {
    * Start elapsed time counter
    */
   startElapsedTimeCounter() {
-    this.startTime = Date.now();
+    // If we have paused time, resume from there, otherwise start fresh
+    if (this.pausedTime > 0) {
+      // Resume from pause - calculate when we originally started
+      this.startTime = Date.now() - (this.pausedTime * 1000);
+    } else {
+      // Fresh start
+      this.startTime = Date.now();
+    }
+
+    // Clear any existing interval
+    if (this.elapsedTimeInterval) {
+      clearInterval(this.elapsedTimeInterval);
+    }
 
     this.elapsedTimeInterval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
       this.appState.set('audioPlayer.elapsedTime', elapsed);
+      this.pausedTime = elapsed; // Store current elapsed time
     }, 1000);
   }
 
@@ -227,6 +241,8 @@ export class AudioPlayer {
   resetElapsedTime() {
     // Reset the start time to now
     this.startTime = Date.now();
+    // Reset the paused time
+    this.pausedTime = 0;
     // Reset the displayed elapsed time
     this.appState.set('audioPlayer.elapsedTime', 0);
   }
