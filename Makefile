@@ -1,9 +1,9 @@
 # RadioCalico Docker Makefile
 .PHONY: help build dev prod test clean logs shell stop restart
 .PHONY: test-all test-backend test-frontend test-watch test-coverage test-verbose
-.PHONY: security security-audit security-audit-critical security-audit-high security-fix security-fix-force
-.PHONY: security-docker scan-docker security-check security-outdated security-docker-audit
-.PHONY: security-report security-metrics
+.PHONY: security security-prereq security-quick security-audit security-audit-critical security-audit-high
+.PHONY: security-fix security-fix-force security-docker scan-docker security-check security-outdated
+.PHONY: security-docker-audit security-report security-metrics
 
 # Default target
 help:
@@ -45,6 +45,8 @@ help:
 	@echo ""
 	@echo "Security Commands:"
 	@echo "  make security              - Run all security checks"
+	@echo "  make security-prereq       - Check security scan prerequisites"
+	@echo "  make security-quick        - Quick scan (high severity only)"
 	@echo "  make security-audit        - Check for all vulnerabilities"
 	@echo "  make security-audit-critical - Check for critical vulnerabilities only"
 	@echo "  make security-audit-high   - Check for high+ severity vulnerabilities"
@@ -54,7 +56,7 @@ help:
 	@echo "  make scan-docker           - Scan running containers"
 	@echo "  make security-check        - Generate JSON report for CI/CD"
 	@echo "  make security-report       - Generate comprehensive text report"
-	@echo "  make security-metrics      - Track security metrics and trends"
+	@echo "  make security-metrics      - Track security metrics (requires jq)"
 	@echo ""
 	@echo "PostgreSQL Commands:"
 	@echo "  make postgres      - Start PostgreSQL environment"
@@ -168,8 +170,22 @@ test-docker-watch:
 	docker run --rm -it -v $(PWD):/app -w /app node:20-alpine npm run test:watch
 
 # =================== Security Commands ===================
+# Check security prerequisites
+security-prereq:
+	@echo "🔍 Checking security scan prerequisites..."
+	@command -v npm >/dev/null 2>&1 || (echo "❌ npm is required" && exit 1)
+	@command -v docker >/dev/null 2>&1 || echo "⚠️  docker is optional but recommended for container scanning"
+	@command -v jq >/dev/null 2>&1 || echo "⚠️  jq is optional but required for security-metrics"
+	@echo "✅ Prerequisites check complete"
+
+# Quick security scan for development
+security-quick:
+	@echo "⚡ Running quick security scan (high severity only)..."
+	npm audit --audit-level=high
+	@echo "✅ Quick scan complete"
+
 # Run all security checks
-security: security-audit security-docker
+security: security-prereq security-audit security-docker
 	@echo "✅ All security checks completed"
 
 # Run npm audit to check for vulnerabilities
@@ -267,6 +283,7 @@ security-report:
 # Track security metrics and trends
 security-metrics:
 	@echo "📈 Generating security metrics..."
+	@which jq >/dev/null 2>&1 || (echo "❌ Error: jq is required for security metrics. Install with: brew install jq (macOS) or apt-get install jq (Linux)" && exit 1)
 	@echo "=== Security Metrics Report ===" > security-metrics.txt
 	@echo "Generated: $$(date)" >> security-metrics.txt
 	@echo "" >> security-metrics.txt
