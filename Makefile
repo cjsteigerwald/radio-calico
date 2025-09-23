@@ -289,22 +289,41 @@ trivy-scan:
 	@echo "🔍 Running comprehensive Trivy security scan..."
 	@if command -v trivy >/dev/null 2>&1; then \
 		mkdir -p docs/security-scans; \
-		echo "Scanning production image (radiocalico:latest)..."; \
-		trivy image radiocalico:latest --format table > docs/security-scans/trivy-scan-latest-$$(date +%Y%m%d-%H%M%S).txt 2>&1; \
-		trivy image radiocalico:latest --severity HIGH,CRITICAL --quiet || echo "✅ No HIGH/CRITICAL vulnerabilities"; \
+		if docker images | grep -q "radiocalico.*latest"; then \
+			echo "Scanning production image (radiocalico:latest)..."; \
+			trivy image radiocalico:latest --format table > docs/security-scans/trivy-scan-latest-$$(date +%Y%m%d-%H%M%S).txt 2>&1; \
+			trivy image radiocalico:latest --severity HIGH,CRITICAL --quiet || echo "✅ No HIGH/CRITICAL vulnerabilities"; \
+		else \
+			echo "⚠️  Production image not built yet (radiocalico:latest)"; \
+		fi; \
 		echo ""; \
-		echo "Scanning development image (radiocalico:dev)..."; \
-		trivy image radiocalico:dev --format table > docs/security-scans/trivy-scan-dev-$$(date +%Y%m%d-%H%M%S).txt 2>&1; \
-		trivy image radiocalico:dev --severity HIGH,CRITICAL --quiet || echo "✅ No HIGH/CRITICAL vulnerabilities"; \
+		if docker images | grep -q "radiocalico.*dev"; then \
+			echo "Scanning development image (radiocalico:dev)..."; \
+			trivy image radiocalico:dev --format table > docs/security-scans/trivy-scan-dev-$$(date +%Y%m%d-%H%M%S).txt 2>&1; \
+			trivy image radiocalico:dev --severity HIGH,CRITICAL --quiet || echo "✅ No HIGH/CRITICAL vulnerabilities"; \
+		else \
+			echo "⚠️  Development image not built yet (radiocalico:dev)"; \
+		fi; \
 		echo ""; \
 		echo "📊 Full reports saved to docs/security-scans/"; \
 		echo "Summary:"; \
-		echo "  Production image vulnerabilities: $$(trivy image radiocalico:latest --quiet --format json 2>/dev/null | grep -o '"VulnerabilityID"' | wc -l | xargs)"; \
-		echo "  Development image vulnerabilities: $$(trivy image radiocalico:dev --quiet --format json 2>/dev/null | grep -o '"VulnerabilityID"' | wc -l | xargs)"; \
+		if command -v jq >/dev/null 2>&1; then \
+			if docker images | grep -q "radiocalico.*latest"; then \
+				echo "  Production image vulnerabilities: $$(trivy image radiocalico:latest --quiet --format json 2>/dev/null | jq '[.Results[].Vulnerabilities // [] | length] | add // 0')"; \
+			fi; \
+			if docker images | grep -q "radiocalico.*dev"; then \
+				echo "  Development image vulnerabilities: $$(trivy image radiocalico:dev --quiet --format json 2>/dev/null | jq '[.Results[].Vulnerabilities // [] | length] | add // 0')"; \
+			fi; \
+		else \
+			echo "  Production image vulnerabilities: $$(trivy image radiocalico:latest --quiet --format json 2>/dev/null | grep -o '"VulnerabilityID"' | wc -l | xargs)"; \
+			echo "  Development image vulnerabilities: $$(trivy image radiocalico:dev --quiet --format json 2>/dev/null | grep -o '"VulnerabilityID"' | wc -l | xargs)"; \
+		fi; \
 	else \
 		echo "❌ Trivy not installed. Install with:"; \
 		echo "  brew install aquasecurity/trivy/trivy  # macOS"; \
-		echo "  curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Linux"; \
+		echo "  # For Linux, verify the script first:"; \
+		echo "  curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | less  # Review script"; \
+		echo "  curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Install"; \
 	fi
 
 # Scan running containers for security issues
