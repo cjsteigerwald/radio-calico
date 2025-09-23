@@ -1,5 +1,6 @@
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const validator = require('validator');
 
 /**
  * Security Headers Middleware
@@ -76,50 +77,82 @@ const rateLimiter = createRateLimiter({
  * Adds additional security headers not covered by Helmet
  */
 const customSecurityHeaders = (req, res, next) => {
-  // Prevent browser from MIME-sniffing
-  res.setHeader('X-Content-Type-Options', 'nosniff');
+  try {
+    // Prevent browser from MIME-sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
 
-  // Enable browser XSS filtering
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+    // Enable browser XSS filtering
+    res.setHeader('X-XSS-Protection', '1; mode=block');
 
-  // Prevent clickjacking
-  res.setHeader('X-Frame-Options', 'DENY');
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
 
-  // Control referrer information
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Control referrer information
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Permissions Policy (formerly Feature Policy)
-  res.setHeader('Permissions-Policy',
-    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()'
-  );
+    // Permissions Policy (formerly Feature Policy)
+    res.setHeader('Permissions-Policy',
+      'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()'
+    );
 
-  next();
+    next();
+  } catch (error) {
+    console.error('Error setting security headers:', error);
+    next(); // Continue even if header setting fails
+  }
 };
 
 /**
  * Input Sanitization Middleware
- * Basic XSS protection for incoming data
+ * Robust XSS protection using validator.js
  */
 const sanitizeInput = (req, res, next) => {
   const sanitize = (obj) => {
     for (let key in obj) {
       if (typeof obj[key] === 'string') {
-        // Remove script tags and common XSS patterns
-        obj[key] = obj[key]
-          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          .replace(/javascript:/gi, '')
-          .replace(/on\w+\s*=/gi, '');
-      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        // Use validator.js for robust sanitization
+        // This escapes HTML entities and removes dangerous characters
+        obj[key] = validator.escape(obj[key]);
+
+        // Additional sanitization for common XSS patterns
+        // Strip any remaining HTML tags
+        obj[key] = validator.stripLow(obj[key]);
+
+        // Trim whitespace
+        obj[key] = validator.trim(obj[key]);
+      } else if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+        // Recursively sanitize nested objects (but not arrays)
         sanitize(obj[key]);
+      } else if (Array.isArray(obj[key])) {
+        // Sanitize array elements
+        obj[key] = obj[key].map(item => {
+          if (typeof item === 'string') {
+            return validator.trim(validator.escape(item));
+          }
+          return item;
+        });
       }
     }
   };
 
-  if (req.body) sanitize(req.body);
-  if (req.query) sanitize(req.query);
-  if (req.params) sanitize(req.params);
+  try {
+    if (req.body) sanitize(req.body);
+    if (req.query) sanitize(req.query);
+    if (req.params) sanitize(req.params);
 
-  next();
+    // Also sanitize headers that might contain user input
+    const dangerousHeaders = ['referer', 'user-agent', 'x-forwarded-for'];
+    dangerousHeaders.forEach(header => {
+      if (req.headers[header] && typeof req.headers[header] === 'string') {
+        req.headers[header] = validator.escape(req.headers[header]);
+      }
+    });
+
+    next();
+  } catch (error) {
+    console.error('Error sanitizing input:', error);
+    next(); // Continue even if sanitization fails
+  }
 };
 
 module.exports = {
