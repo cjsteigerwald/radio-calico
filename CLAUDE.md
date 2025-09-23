@@ -44,7 +44,8 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - `npm run test:coverage` - Generate test coverage report
 - `npm run test:verbose` - Run tests with verbose output
 
-### Security Scanning
+### Security Scanning (Comprehensive)
+#### Dependency Scanning
 - `make security` - Run all security checks (npm audit + Docker scans)
 - `make security-audit` - Run npm audit to check for vulnerabilities
 - `make security-fix` - Auto-fix npm vulnerabilities (use with caution)
@@ -53,6 +54,20 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - `make security-check` - Generate detailed security audit with JSON output
 - `make security-report` - Generate comprehensive security report
 - `make security-outdated` - Check for outdated dependencies
+
+#### Static Application Security Testing (SAST)
+- `make security-sast` - Run complete SAST analysis
+- `make security-lint` - Run ESLint with security plugins
+- `make security-secrets` - Scan for hardcoded secrets
+- `make security-headers` - Test HTTP security headers
+- `make security-full` - Run ALL security tests (dependencies + SAST + headers)
+
+#### Security Features Implemented
+- **Helmet.js** security headers (CSP, X-Frame-Options, etc.)
+- **Rate limiting** on all API endpoints (DDoS protection)
+- **Input sanitization** middleware (XSS prevention)
+- **ESLint security plugins** for code vulnerability detection
+- **Secret detection** to prevent credential leaks
 
 ### Installation
 - `npm install` - Install all dependencies
@@ -268,6 +283,8 @@ The application uses centralized configuration with environment variable support
 - dotenv - Environment variable management
 - cors - CORS middleware
 - body-parser - Request body parsing
+- helmet - Security headers middleware
+- express-rate-limit - Rate limiting middleware
 
 ### Development
 - nodemon - Auto-reload on file changes
@@ -280,6 +297,9 @@ The application uses centralized configuration with environment variable support
 - @testing-library/dom - DOM testing utilities
 - @testing-library/jest-dom - Custom Jest matchers
 - @babel/core, @babel/preset-env, babel-jest - ES6 transpilation
+- eslint (v8.57.0) - JavaScript linter
+- eslint-plugin-security - Security vulnerability detection
+- eslint-plugin-no-secrets - Secret detection plugin
 
 ## Quick Start
 
