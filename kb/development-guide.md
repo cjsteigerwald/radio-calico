@@ -401,6 +401,25 @@ Validates:
 ```bash
 make security-quick  # Quick high-severity scan
 make security-full   # Complete security assessment
+make trivy-scan      # Docker image vulnerability scanning
+```
+
+#### 6. Docker Container Security
+```bash
+# Install Trivy scanner
+brew install aquasecurity/trivy/trivy  # macOS
+
+# For Linux - verify the script first for security:
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | less  # Review script
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Install
+
+# Optional: Install jq for better JSON parsing
+brew install jq  # macOS
+apt-get install jq  # Ubuntu/Debian
+
+# Scan Docker images
+make trivy-scan       # Detailed vulnerability report (handles missing images gracefully)
+make security-docker  # Quick scan with auto-detection
 ```
 
 ### Security Implementation Details
