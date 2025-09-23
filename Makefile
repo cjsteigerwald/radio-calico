@@ -57,6 +57,7 @@ help:
 	@echo "  make security-fix          - Auto-fix vulnerabilities (use with caution)"
 	@echo "  make security-fix-force    - Force fix with confirmation (may break)"
 	@echo "  make security-docker       - Scan Docker images for vulnerabilities"
+	@echo "  make trivy-scan            - Comprehensive Docker scan with Trivy"
 	@echo "  make scan-docker           - Scan running containers"
 	@echo "  make security-check        - Generate JSON report for CI/CD"
 	@echo "  make security-report       - Generate basic security report"
@@ -250,10 +251,17 @@ security-fix-force:
 	npm audit fix --force
 	@echo "❗ Critical: Test your application thoroughly after force fixing"
 
-# Scan Docker images for vulnerabilities using native Docker scan
+# Scan Docker images for vulnerabilities using Trivy or native Docker scan
 security-docker:
 	@echo "🐳 Detecting available Docker security scanner..."
-	@if command -v docker scout >/dev/null 2>&1; then \
+	@if command -v trivy >/dev/null 2>&1; then \
+		echo "✅ Using Trivy for vulnerability scanning"; \
+		echo "Scanning production image..."; \
+		trivy image radiocalico:latest --severity HIGH,CRITICAL --scanners vuln 2>/dev/null || echo "Production image not found"; \
+		echo ""; \
+		echo "Scanning development image..."; \
+		trivy image radiocalico:dev --severity HIGH,CRITICAL --scanners vuln 2>/dev/null || echo "Development image not found"; \
+	elif command -v docker scout >/dev/null 2>&1; then \
 		echo "✅ Using Docker Scout for vulnerability scanning"; \
 		echo "Scanning production image..."; \
 		docker scout cves radiocalico:latest 2>/dev/null || echo "Production image not found"; \
@@ -269,7 +277,34 @@ security-docker:
 		docker scan radiocalico:dev 2>/dev/null || echo "Development image not found"; \
 	else \
 		echo "❌ No Docker security scanner found."; \
-		echo "Install Docker Desktop or docker-scan plugin for vulnerability scanning."; \
+		echo "Install Trivy, Docker Desktop, or docker-scan plugin for vulnerability scanning."; \
+		echo ""; \
+		echo "To install Trivy:"; \
+		echo "  brew install aquasecurity/trivy/trivy  # macOS"; \
+		echo "  curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Linux"; \
+	fi
+
+# Scan Docker images with Trivy for detailed vulnerability report
+trivy-scan:
+	@echo "🔍 Running comprehensive Trivy security scan..."
+	@if command -v trivy >/dev/null 2>&1; then \
+		mkdir -p docs/security-scans; \
+		echo "Scanning production image (radiocalico:latest)..."; \
+		trivy image radiocalico:latest --format table > docs/security-scans/trivy-scan-latest-$$(date +%Y%m%d-%H%M%S).txt 2>&1; \
+		trivy image radiocalico:latest --severity HIGH,CRITICAL --quiet || echo "✅ No HIGH/CRITICAL vulnerabilities"; \
+		echo ""; \
+		echo "Scanning development image (radiocalico:dev)..."; \
+		trivy image radiocalico:dev --format table > docs/security-scans/trivy-scan-dev-$$(date +%Y%m%d-%H%M%S).txt 2>&1; \
+		trivy image radiocalico:dev --severity HIGH,CRITICAL --quiet || echo "✅ No HIGH/CRITICAL vulnerabilities"; \
+		echo ""; \
+		echo "📊 Full reports saved to docs/security-scans/"; \
+		echo "Summary:"; \
+		echo "  Production image vulnerabilities: $$(trivy image radiocalico:latest --quiet --format json 2>/dev/null | grep -o '"VulnerabilityID"' | wc -l | xargs)"; \
+		echo "  Development image vulnerabilities: $$(trivy image radiocalico:dev --quiet --format json 2>/dev/null | grep -o '"VulnerabilityID"' | wc -l | xargs)"; \
+	else \
+		echo "❌ Trivy not installed. Install with:"; \
+		echo "  brew install aquasecurity/trivy/trivy  # macOS"; \
+		echo "  curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin  # Linux"; \
 	fi
 
 # Scan running containers for security issues

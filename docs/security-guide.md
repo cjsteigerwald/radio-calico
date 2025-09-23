@@ -88,12 +88,18 @@ This document outlines the comprehensive security measures implemented in RadioC
 
 ### 7. Container Security
 - **What it does**: Scans Docker images for vulnerabilities
-- **Tools**: Docker Scout/Snyk
+- **Tools**: Trivy/Docker Scout/Snyk
 - **Commands**:
   ```bash
-  make security-docker  # Scan Docker images
+  make security-docker  # Auto-detect and use available scanner
+  make trivy-scan      # Comprehensive scan with Trivy (recommended)
   make scan-docker      # Scan running containers
   ```
+- **Trivy Features**:
+  - Zero false positives
+  - Fast scanning (offline database)
+  - Detailed vulnerability information
+  - Support for multiple formats (table, JSON, SARIF)
 
 ## Security Testing Commands
 

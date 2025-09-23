@@ -222,6 +222,7 @@ make security-sast   # Static application security testing
 make security-lint   # Code vulnerability analysis
 make security-secrets # Hardcoded secrets detection
 make security-headers # HTTP security headers validation
+make trivy-scan      # Docker image vulnerability scanning
 
 # Generate comprehensive reports
 make security-report-full # All scans with archive to docs/security-scans/
