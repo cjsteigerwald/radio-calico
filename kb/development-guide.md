@@ -427,6 +427,7 @@ Automatically applied to all responses with proper CSP configuration for the app
 ```bash
 make security-quick   # Quick vulnerability check
 make security-secrets # Ensure no secrets
+make test-save       # Run tests and archive results
 git add . && git commit
 ```
 
@@ -441,7 +442,8 @@ npm run lint:fix      # Fix linting issues
 ```bash
 make security-full           # Complete assessment
 cat security-metrics.txt     # Review metrics
-make security-report         # Generate report
+make security-report-full    # Generate comprehensive report
+# Reports saved to docs/security-scans/
 ```
 
 ### Security Checklist
@@ -456,18 +458,46 @@ make security-report         # Generate report
 
 ## Testing Guidelines
 
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode for development
+npm run test:watch
+
+# Backend tests only
+npm run test:backend
+
+# Frontend tests only
+npm run test:frontend
+
+# Run tests and save results for documentation
+make test-save       # Saves results to docs/test-results/
+make test-report     # Generate coverage report and save
+```
+
 ### Test Structure
 ```
 tests/
-├── unit/              # Unit tests for individual components
-│   ├── services/      # Service layer tests
-│   ├── controllers/   # Controller tests
-│   └── middleware/    # Middleware tests
-├── integration/       # Integration tests
-│   ├── api/          # API endpoint tests
-│   └── database/     # Database tests
-├── e2e/              # End-to-end tests
-└── helpers/          # Test utilities and fixtures
+├── backend/           # Backend test suites
+│   ├── unit/         # Unit tests for services, controllers, middleware
+│   └── integration/  # Integration tests (planned)
+├── frontend/         # Frontend test suites
+│   ├── unit/         # Unit tests for modules and utilities
+│   └── mocks/        # Mock handlers and style mocks
+├── setup/            # Test configuration files
+│   ├── backend.setup.js
+│   └── frontend.setup.js
+
+docs/
+├── test-results/     # Archived test execution reports
+│   └── test-run-YYYYMMDD-HHMMSS.txt
+└── security-scans/   # Archived security scan reports
+    └── security-scan-YYYYMMDD-HHMMSS.txt
 ```
 
 ### Unit Testing Examples

@@ -146,7 +146,10 @@ radiocalico/
 │   └── setup/             # Test configuration
 ├── docs/                  # Project documentation
 │   ├── testing-strategy.md
-│   └── testing-framework-summary.md
+│   ├── testing-framework-summary.md
+│   ├── security-guide.md
+│   ├── test-results/      # Test execution logs
+│   └── security-scans/    # Security scan archives
 ├── kb/                    # Knowledge base
 │   ├── frontend-architecture.md
 │   ├── backend-architecture.md
@@ -195,6 +198,10 @@ npm run test:backend # Run backend tests only
 npm run test:frontend # Run frontend tests only
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
+
+# Save test results for tracking
+make test-save       # Run tests and archive results
+make test-report     # Generate coverage and archive
 ```
 
 ### Security Testing
@@ -215,6 +222,9 @@ make security-sast   # Static application security testing
 make security-lint   # Code vulnerability analysis
 make security-secrets # Hardcoded secrets detection
 make security-headers # HTTP security headers validation
+
+# Generate comprehensive reports
+make security-report-full # All scans with archive to docs/security-scans/
 ```
 
 #### Security Features

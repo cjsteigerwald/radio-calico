@@ -43,6 +43,8 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - `npm run test:watch` - Run tests in watch mode for development
 - `npm run test:coverage` - Generate test coverage report
 - `npm run test:verbose` - Run tests with verbose output
+- `make test-save` - Run tests and archive results to docs/test-results/
+- `make test-report` - Generate coverage report and save to docs/test-results/
 
 ### Security Scanning (Comprehensive)
 #### Dependency Scanning
@@ -61,6 +63,7 @@ RadioCalico is an internet radio application built with Node.js and Express. Bot
 - `make security-secrets` - Scan for hardcoded secrets
 - `make security-headers` - Test HTTP security headers
 - `make security-full` - Run ALL security tests (dependencies + SAST + headers)
+- `make security-report-full` - Generate comprehensive report with all scans (saves to docs/security-scans/)
 
 #### Security Features Implemented
 - **Helmet.js** security headers (CSP, X-Frame-Options, etc.)
