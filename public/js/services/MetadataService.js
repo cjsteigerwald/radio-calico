@@ -8,7 +8,7 @@ export class MetadataService {
   constructor(appState, iTunesService) {
     this.appState = appState;
     this.iTunesService = iTunesService;
-    this.metadataUrl = 'https://radiocalico.com/metadata.json';
+    this.metadataUrl = 'https://d3d4yli4hf5bmh.cloudfront.net/metadatav2.json';
     this.pollInterval = 10000; // 10 seconds
     this.pollTimer = null;
     this.lastTrackId = null;
@@ -51,12 +51,8 @@ export class MetadataService {
    */
   async fetchMetadata() {
     try {
-      const response = await fetch(this.metadataUrl, {
-        cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache'
-        }
-      });
+      // Simple GET request without custom headers to avoid CORS preflight
+      const response = await fetch(this.metadataUrl);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -139,6 +135,8 @@ export class MetadataService {
       const bitDepth = parseInt(metadata.bit_depth, 10);
       const sampleRate = parseInt(metadata.sample_rate, 10);
 
+      console.log('Quality data:', { bit_depth: metadata.bit_depth, sample_rate: metadata.sample_rate, parsed: { bitDepth, sampleRate } });
+
       // Check if values are valid numbers
       if (!isNaN(bitDepth) && !isNaN(sampleRate) && sampleRate > 0) {
         const sourceQuality = this.formatQuality(bitDepth, sampleRate);
@@ -148,6 +146,8 @@ export class MetadataService {
         // The actual stream quality may vary based on network conditions
         // but typically streams at 48kHz for HLS
         const streamQuality = metadata.stream_quality || 'HLS Adaptive (up to 48kHz)';
+
+        console.log('Setting quality:', { source: sourceQuality, stream: streamQuality });
 
         this.appState.setBatch({
           'quality.source': sourceQuality,

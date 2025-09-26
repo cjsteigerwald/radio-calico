@@ -10,6 +10,7 @@ export class AudioPlayer {
     this.hls = null;
     this.elapsedTimeInterval = null;
     this.startTime = Date.now();
+    this.pausedTime = 0;  // Track accumulated paused time
 
     this.init();
   }
@@ -21,6 +22,9 @@ export class AudioPlayer {
     this.createAudioElement();
     this.setupEventListeners();
     this.initializeHLS();
+
+    // Ensure timer is at 0 on initialization
+    this.appState.set('audioPlayer.elapsedTime', 0);
   }
 
   /**
@@ -43,10 +47,14 @@ export class AudioPlayer {
   setupEventListeners() {
     this.audioElement.addEventListener('loadstart', () => {
       this.updateStatus('Loading stream...');
+      // Ensure timer stays at 0 during loading
+      this.appState.set('audioPlayer.elapsedTime', 0);
     });
 
     this.audioElement.addEventListener('canplay', () => {
       this.updateStatus('Ready to play');
+      // Ensure timer stays at 0 when ready to play (before user presses play)
+      this.appState.set('audioPlayer.elapsedTime', 0);
     });
 
     this.audioElement.addEventListener('play', () => {
@@ -90,6 +98,10 @@ export class AudioPlayer {
 
     this.audioElement.addEventListener('waiting', () => {
       this.updateStatus('Buffering...');
+      // Keep timer at 0 if not playing
+      if (this.audioElement.paused) {
+        this.appState.set('audioPlayer.elapsedTime', 0);
+      }
     });
 
     this.audioElement.addEventListener('playing', () => {
@@ -101,6 +113,9 @@ export class AudioPlayer {
    * Initialize HLS.js for streaming
    */
   initializeHLS() {
+    // Ensure timer stays at 0 during HLS initialization
+    this.appState.set('audioPlayer.elapsedTime', 0);
+
     if (Hls.isSupported()) {
       this.hls = new Hls({
         enableWorker: true,
@@ -114,10 +129,17 @@ export class AudioPlayer {
 
       this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
         this.updateStatus('Stream ready');
+        // Ensure timer stays at 0 when stream is ready
+        this.appState.set('audioPlayer.elapsedTime', 0);
       });
 
       this.hls.on(Hls.Events.ERROR, (event, data) => {
         console.error('HLS error:', data);
+
+        // Ensure timer stays at 0 during errors if not playing
+        if (this.audioElement.paused) {
+          this.appState.set('audioPlayer.elapsedTime', 0);
+        }
 
         if (data.fatal) {
           switch (data.type) {
@@ -141,10 +163,14 @@ export class AudioPlayer {
       // Fallback for Safari
       this.audioElement.src = this.streamUrl;
       this.updateStatus('Stream ready (native HLS)');
+      // Ensure timer stays at 0
+      this.appState.set('audioPlayer.elapsedTime', 0);
 
     } else {
       this.updateStatus('HLS not supported in this browser');
       console.error('HLS is not supported');
+      // Ensure timer stays at 0
+      this.appState.set('audioPlayer.elapsedTime', 0);
     }
   }
 
@@ -213,12 +239,29 @@ export class AudioPlayer {
    * Start elapsed time counter
    */
   startElapsedTimeCounter() {
-    this.startTime = Date.now();
+    // Only start counter if user has initiated playback
+    // This prevents timer from starting during HLS buffering
+    if (!this.audioElement.paused) {
+      // If we have paused time, resume from there, otherwise start fresh
+      if (this.pausedTime > 0) {
+        // Resume from pause - calculate when we originally started
+        this.startTime = Date.now() - (this.pausedTime * 1000);
+      } else {
+        // Fresh start
+        this.startTime = Date.now();
+      }
 
-    this.elapsedTimeInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-      this.appState.set('audioPlayer.elapsedTime', elapsed);
-    }, 1000);
+      // Clear any existing interval
+      if (this.elapsedTimeInterval) {
+        clearInterval(this.elapsedTimeInterval);
+      }
+
+      this.elapsedTimeInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+        this.appState.set('audioPlayer.elapsedTime', elapsed);
+        this.pausedTime = elapsed; // Store current elapsed time
+      }, 1000);
+    }
   }
 
   /**
@@ -227,6 +270,8 @@ export class AudioPlayer {
   resetElapsedTime() {
     // Reset the start time to now
     this.startTime = Date.now();
+    // Reset the paused time
+    this.pausedTime = 0;
     // Reset the displayed elapsed time
     this.appState.set('audioPlayer.elapsedTime', 0);
   }

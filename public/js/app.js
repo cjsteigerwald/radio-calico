@@ -175,22 +175,22 @@ class RadioCalicoApp {
 
     // Rating buttons
     if (this.uiElements.thumbsUp) {
-      this.uiElements.thumbsUp.addEventListener('click', () => {
-        this.ratingSystem.handleLike();
+      this.uiElements.thumbsUp.addEventListener('click', async () => {
+        await this.ratingSystem.handleLike();
       });
     }
 
     if (this.uiElements.thumbsDown) {
-      this.uiElements.thumbsDown.addEventListener('click', () => {
-        this.ratingSystem.handleDislike();
+      this.uiElements.thumbsDown.addEventListener('click', async () => {
+        await this.ratingSystem.handleDislike();
       });
     }
 
     // Track change events
     document.addEventListener('trackChanged', (event) => {
       this.ratingSystem.onTrackChange();
-      // Reset elapsed time when track changes
-      if (this.audioPlayer && !this.audioPlayer.audioElement.paused) {
+      // Reset elapsed time when track changes (regardless of play state)
+      if (this.audioPlayer) {
         this.audioPlayer.resetElapsedTime();
       }
     });
