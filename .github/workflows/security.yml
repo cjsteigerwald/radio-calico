@@ -35,17 +35,26 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run npm audit
-      id: npm-audit
+    - name: Install security tools
       run: |
-        npm audit --json > npm-audit-results.json || true
-        npm audit --audit-level=moderate || true
+        sudo apt-get update
+        sudo apt-get install -y jq curl wget
 
-    - name: Upload npm audit results
+    - name: Run full security assessment using Makefile
+      id: security-full
+      run: |
+        make security-full || true
+        make security-metrics || true
+
+    - name: Upload comprehensive security report
       uses: actions/upload-artifact@v4
       with:
-        name: npm-audit-results
-        path: npm-audit-results.json
+        name: security-full-report
+        path: |
+          security-full-report.txt
+          security-metrics.txt
+          security-report.json
+          docs/security-scans/
 
     - name: Run Snyk security test
       uses: snyk/actions/node@master
@@ -81,10 +90,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build Docker images
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Docker images using Makefile
       run: |
-        docker build -t radiocalico:prod -f Dockerfile .
-        docker build -t radiocalico:dev -f Dockerfile.dev .
+        make build
+        docker tag radiocalico:latest radiocalico:prod
+        make dev-build || docker build -t radiocalico:dev -f Dockerfile.dev .
 
     - name: Run Trivy on production image
       uses: aquasecurity/trivy-action@master
@@ -138,6 +157,20 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run secret scanning using Makefile
+      run: |
+        make security-secrets
+      continue-on-error: true
+
     - name: TruffleHog OSS
       uses: trufflesecurity/trufflehog@main
       with:
@@ -145,12 +178,6 @@ jobs:
         base: ${{ github.event.repository.default_branch }}
         head: HEAD
         extra_args: --debug --only-verified
-
-    - name: Detect secrets with detect-secrets
-      run: |
-        pip install detect-secrets
-        detect-secrets scan --baseline .secrets.baseline
-        detect-secrets audit .secrets.baseline
       continue-on-error: true
 
     - name: GitLeaks
@@ -176,16 +203,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run ESLint with security plugin
+    - name: Run SAST using Makefile
       run: |
         npm install --save-dev eslint-plugin-security eslint-plugin-no-secrets
-        npx eslint . --ext .js --format json --output-file eslint-security.json || true
+        make security-sast
+        make security-lint > eslint-security.txt 2>&1 || true
 
-    - name: Upload ESLint security results
+    - name: Upload SAST results
       uses: actions/upload-artifact@v4
       with:
-        name: eslint-security-report
-        path: eslint-security.json
+        name: sast-security-report
+        path: eslint-security.txt
 
     - name: Run NodeJsScan
       uses: ajinabraham/njsscan-action@master

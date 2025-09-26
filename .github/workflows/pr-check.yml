@@ -41,12 +41,13 @@ jobs:
         done
       continue-on-error: true
 
-    - name: Run tests
+    - name: Run tests using Makefile
       id: tests
       run: |
-        npm test -- --json --outputFile=test-results.json || true
-        if [ -f test-results.json ]; then
-          echo "test_results=$(cat test-results.json | jq -c .)" >> $GITHUB_OUTPUT
+        make test-all > test-output.txt 2>&1 || true
+        echo "test_exit_code=$?" >> $GITHUB_OUTPUT
+        if [ -f test-output.txt ]; then
+          echo "Tests completed. Check artifacts for details."
         fi
 
     - name: Run linter
@@ -60,33 +61,41 @@ jobs:
           echo "lint_warnings=${warnings:-0}" >> $GITHUB_OUTPUT
         fi
 
-    - name: Check for security issues
+    - name: Check for security issues using Makefile
       id: security
       run: |
-        npm audit --json > audit-results.json || true
-        if [ -f audit-results.json ]; then
-          vulnerabilities=$(cat audit-results.json | jq '.metadata.vulnerabilities.total // 0')
+        make security-quick > security-quick.txt 2>&1 || true
+        make security-check || true
+        if [ -f security-report.json ]; then
+          vulnerabilities=$(cat security-report.json | jq '.metadata.vulnerabilities.total // 0')
           echo "vulnerabilities=${vulnerabilities}" >> $GITHUB_OUTPUT
         fi
 
-    - name: Check bundle size
+    - name: Check bundle size and file metrics
       run: |
         echo "Checking bundle sizes..."
-        # Add bundle size checking logic here if needed
+        echo "JavaScript files:"
+        find public -name "*.js" -exec du -h {} \; | sort -rh | head -20
+        echo ""
+        echo "CSS files:"
+        find public -name "*.css" -exec du -h {} \; | sort -rh | head -10
+        echo ""
+        echo "Total size of public directory:"
+        du -sh public/
       continue-on-error: true
 
     - name: Post PR comment
       uses: actions/github-script@v7
       with:
         script: |
-          const testsPassed = '${{ steps.tests.outputs.test_results }}' ? true : false;
+          const testExitCode = parseInt('${{ steps.tests.outputs.test_exit_code }}') || 1;
           const lintErrors = parseInt('${{ steps.lint.outputs.lint_errors }}') || 0;
           const lintWarnings = parseInt('${{ steps.lint.outputs.lint_warnings }}') || 0;
           const vulnerabilities = parseInt('${{ steps.security.outputs.vulnerabilities }}') || 0;
 
           let comment = '## Pull Request Check Results\n\n';
           comment += '### Test Results\n';
-          comment += testsPassed ? '✅ All tests passed\n\n' : '⚠️ Some tests failed\n\n';
+          comment += testExitCode === 0 ? '✅ All tests passed\n\n' : '⚠️ Some tests may have failed - check artifacts\n\n';
 
           comment += '### Code Quality\n';
           comment += `- Lint Errors: ${lintErrors === 0 ? '✅' : '❌'} ${lintErrors}\n`;
