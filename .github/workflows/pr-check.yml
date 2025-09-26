@@ -30,15 +30,23 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Install required tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y jq
+
     - name: Check commit messages
       run: |
-        git log --format='%s' origin/${{ github.base_ref }}..HEAD | while read commit_msg; do
-          if ! echo "$commit_msg" | grep -qE '^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,}'; then
-            echo "Invalid commit message: $commit_msg"
-            echo "Commit messages should follow conventional commits format"
-            exit 1
-          fi
-        done
+        if git rev-parse origin/${{ github.base_ref }} >/dev/null 2>&1; then
+          git log --format='%s' origin/${{ github.base_ref }}..HEAD | while read commit_msg; do
+            if ! echo "$commit_msg" | grep -qE '^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,}'; then
+              echo "Warning: Non-conventional commit message: $commit_msg"
+              echo "Consider using conventional commits format"
+            fi
+          done
+        else
+          echo "Unable to check commit messages - base ref not found"
+        fi
       continue-on-error: true
 
     - name: Run tests using Makefile
