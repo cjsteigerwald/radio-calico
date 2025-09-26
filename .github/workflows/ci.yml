@@ -1,0 +1,197 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run all tests using Makefile
+      run: make test-all
+      env:
+        CI: true
+
+    - name: Generate coverage report using Makefile
+      run: make test-coverage
+      continue-on-error: true
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-${{ matrix.node-version }}
+        path: coverage/
+      if: always()
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.node-version }}
+        path: test-results/
+      if: always()
+
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run security audit using Makefile
+      run: make security-audit-high
+      continue-on-error: true
+
+    - name: Run ESLint security checks using Makefile
+      run: make security-lint || true
+
+    - name: Upload ESLint results
+      uses: actions/upload-artifact@v4
+      with:
+        name: eslint-security-results
+        path: eslint-results.json
+      if: always()
+
+    - name: Check for secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.repository.default_branch }}
+        head: HEAD
+      continue-on-error: true
+
+  docker-security:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
+
+    - name: Build Docker images using Makefile
+      run: |
+        make build
+        docker tag radiocalico:latest radiocalico:prod
+        if ! make dev-build; then
+          echo "Makefile dev-build failed, attempting direct Docker build..."
+          docker build -t radiocalico:dev -f Dockerfile.dev . || echo "Dev image build failed"
+        fi
+
+    - name: Run comprehensive Trivy scan using Makefile
+      run: make trivy-scan
+      continue-on-error: true
+
+    - name: Upload scan results
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-scan-results
+        path: docs/security-scans/
+      if: always()
+
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npx eslint . --ext .js --max-warnings 10
+      continue-on-error: true
+
+    - name: Check code formatting
+      run: |
+        echo "Code formatting check - placeholder for future prettier configuration"
+        # Once prettier is configured with .prettierrc, uncomment:
+        # npx prettier --check "**/*.{js,json,md,yml,yaml}"
+      continue-on-error: true
+
+  dependency-check:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Check for outdated dependencies
+      run: npm outdated || true
+
+    - name: License check
+      run: npx license-checker --production --summary
+      continue-on-error: true
+
+    - name: Dependency review
+      uses: actions/dependency-review-action@v4
+      if: github.event_name == 'pull_request'
+      continue-on-error: true
