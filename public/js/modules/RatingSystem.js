@@ -75,9 +75,9 @@ export class RatingSystem {
     // Get current state
     const currentUserRating = this.appState.get('rating.userRating');
 
-    // If clicking the same rating, just return (can't remove ratings in current backend)
+    // If clicking the same rating, toggle it off (remove rating)
     if (rating === currentUserRating) {
-      return;
+      rating = 0;  // Remove rating
     }
 
     // Calculate new counts optimistically
@@ -92,7 +92,7 @@ export class RatingSystem {
 
     // Update UI optimistically
     this.appState.setBatch({
-      'rating.userRating': rating,
+      'rating.userRating': rating === 0 ? null : rating,
       'rating.thumbsUp': Math.max(0, newThumbsUp),
       'rating.thumbsDown': Math.max(0, newThumbsDown),
       'rating.isLoading': true
@@ -112,7 +112,7 @@ export class RatingSystem {
       this.appState.setBatch({
         'rating.thumbsUp': response.ratings.thumbs_up,
         'rating.thumbsDown': response.ratings.thumbs_down,
-        'rating.userRating': rating,
+        'rating.userRating': rating === 0 ? null : rating,
         'rating.isLoading': false
       });
 
