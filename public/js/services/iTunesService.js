@@ -2,7 +2,7 @@
  * iTunes API Service for Album Artwork and Metadata
  * Handles searching and fetching album artwork from iTunes API
  */
-export class iTunesService {
+class ITunesService {
   constructor() {
     this.baseUrl = 'https://itunes.apple.com/search';
     this.cache = new Map();
@@ -192,5 +192,6 @@ export class iTunesService {
   }
 }
 
-// Create global iTunes service instance
-export const iTunesService = new iTunesService();
+// Create and export singleton instance
+const itunesServiceInstance = new ITunesService();
+export { itunesServiceInstance as iTunesService };

@@ -18,7 +18,7 @@ export class AppState {
       audioPlayer: {
         isPlaying: false,
         volume: 0.7,
-        elapsedTime: 35,
+        elapsedTime: 0,
         status: 'Ready to play'
       },
       quality: {
@@ -80,6 +80,17 @@ export class AppState {
    * @param {any} value - New value
    */
   set(key, value) {
+    // Safeguard: Prevent non-zero elapsed time when not playing
+    // Check if isPlaying is explicitly true (not undefined, null, or false)
+    const isPlaying = this.get('audioPlayer.isPlaying');
+    if (key === 'audioPlayer.elapsedTime' && isPlaying !== true) {
+      // Only allow setting to 0 when not playing
+      if (value !== 0) {
+        // Silently block and reset to 0
+        value = 0;
+      }
+    }
+
     const oldValue = this.get(key);
     this.setNestedValue(this.state, key, value);
 

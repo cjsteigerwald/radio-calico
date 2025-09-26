@@ -636,7 +636,7 @@
                     </svg>
                 </button>
                 <div class="time-info">
-                    <span id="elapsedTime" class="elapsed-time">0:35</span>
+                    <span id="elapsedTime" class="elapsed-time">0:00</span>
                     <span style="color: #ccc;">/ Live</span>
                 </div>
                 <div class="volume-control">
@@ -863,6 +863,11 @@
                 if (newSongId !== currentSongId) {
                     currentSongId = newSongId;
                     fetchSongRatings(currentSongId);
+                    // Reset elapsed time for new track
+                    resetElapsedTime();
+                    if (isPlaying) {
+                        startElapsedTimer();
+                    }
                 }
 
                 // Fetch and update album artwork
@@ -1000,10 +1005,45 @@
             }
         }
 
+        // Track elapsed time properly
+        let startTime = null;
+        let pausedTime = 0;
+        let elapsedInterval = null;
+
         // Update track time display
         function updateTrackTime() {
-            const currentTime = audioPlayer.currentTime;
-            elapsedTimeDisplay.textContent = formatTime(currentTime);
+            if (startTime && isPlaying) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                elapsedTimeDisplay.textContent = formatTime(elapsed);
+                pausedTime = elapsed;
+            }
+        }
+
+        function startElapsedTimer() {
+            if (!elapsedInterval && isPlaying) {
+                if (pausedTime > 0) {
+                    startTime = Date.now() - (pausedTime * 1000);
+                } else {
+                    startTime = Date.now();
+                }
+                elapsedInterval = setInterval(updateTrackTime, 1000);
+            }
+        }
+
+        function stopElapsedTimer() {
+            if (elapsedInterval) {
+                clearInterval(elapsedInterval);
+                elapsedInterval = null;
+            }
+        }
+
+        function resetElapsedTime() {
+            startTime = null;
+            pausedTime = 0;
+            if (elapsedTimeDisplay) {
+                elapsedTimeDisplay.textContent = '0:00';
+            }
+            stopElapsedTimer();
         }
 
         // Play/Pause functionality
@@ -1045,12 +1085,29 @@
         thumbsUpBtn.addEventListener('click', () => rateSong(1));
         thumbsDownBtn.addEventListener('click', () => rateSong(-1));
 
-        // Audio time update event
-        audioPlayer.addEventListener('timeupdate', updateTrackTime);
+        // Audio event listeners for timer management
+        audioPlayer.addEventListener('play', () => {
+            startElapsedTimer();
+        });
+
+        audioPlayer.addEventListener('pause', () => {
+            stopElapsedTimer();
+        });
 
         // Reset time when metadata loads (new track)
         audioPlayer.addEventListener('loadedmetadata', () => {
-            elapsedTimeDisplay.textContent = '00:00';
+            resetElapsedTime();
+        });
+
+        // Ensure timer stays at 0 during initialization
+        audioPlayer.addEventListener('loadstart', () => {
+            elapsedTimeDisplay.textContent = '0:00';
+        });
+
+        audioPlayer.addEventListener('canplay', () => {
+            if (!isPlaying) {
+                elapsedTimeDisplay.textContent = '0:00';
+            }
         });
 
         // Keyboard shortcuts
@@ -1091,6 +1148,9 @@
         // Initialize player on page load
         initializePlayer();
         updateVolume();
+        // Ensure timer starts at 0
+        elapsedTimeDisplay.textContent = '0:00';
+        resetElapsedTime();
         fetchMetadata(); // Load initial metadata
     </script>
 </body>

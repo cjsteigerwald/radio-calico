@@ -31,12 +31,23 @@ export class RatingSystem {
 
       const response = await this.apiService.getSongRatings(songId, userIdentifier);
 
-      this.appState.setBatch({
-        'rating.thumbsUp': response.ratings.thumbs_up,
-        'rating.thumbsDown': response.ratings.thumbs_down,
-        'rating.userRating': response.userRating,
-        'rating.isLoading': false
-      });
+      // Handle response format properly
+      if (response && response.ratings) {
+        this.appState.setBatch({
+          'rating.thumbsUp': response.ratings.thumbs_up || 0,
+          'rating.thumbsDown': response.ratings.thumbs_down || 0,
+          'rating.userRating': response.userRating || null,
+          'rating.isLoading': false
+        });
+      } else {
+        // Set default values if response format is different
+        this.appState.setBatch({
+          'rating.thumbsUp': 0,
+          'rating.thumbsDown': 0,
+          'rating.userRating': null,
+          'rating.isLoading': false
+        });
+      }
 
     } catch (error) {
       console.error('Failed to load initial ratings:', error);
@@ -61,26 +72,27 @@ export class RatingSystem {
     const songId = this.appState.getCurrentSongId();
     const userIdentifier = this.appState.getUserIdentifier();
 
-    // Optimistic update
+    // Get current state
     const currentUserRating = this.appState.get('rating.userRating');
-    const wasLiked = currentUserRating === 1;
-    const wasDisliked = currentUserRating === -1;
+
+    // If clicking the same rating, just return (can't remove ratings in current backend)
+    if (rating === currentUserRating) {
+      return;
+    }
 
     // Calculate new counts optimistically
     let newThumbsUp = this.appState.get('rating.thumbsUp');
     let newThumbsDown = this.appState.get('rating.thumbsDown');
 
-    // Remove previous rating if exists
-    if (wasLiked) newThumbsUp--;
-    if (wasDisliked) newThumbsDown--;
-
-    // Add new rating
+    // Update counts based on rating change
+    if (currentUserRating === 1) newThumbsUp--;
+    if (currentUserRating === -1) newThumbsDown--;
     if (rating === 1) newThumbsUp++;
     if (rating === -1) newThumbsDown++;
 
     // Update UI optimistically
     this.appState.setBatch({
-      'rating.userRating': rating === currentUserRating ? null : rating,
+      'rating.userRating': rating,
       'rating.thumbsUp': Math.max(0, newThumbsUp),
       'rating.thumbsDown': Math.max(0, newThumbsDown),
       'rating.isLoading': true
@@ -88,13 +100,11 @@ export class RatingSystem {
 
     try {
       // Send rating to backend
-      const finalRating = rating === currentUserRating ? 0 : rating; // Remove if same rating
-
       const response = await this.apiService.rateSong(
         songId,
         currentTrack.artist,
         currentTrack.title,
-        finalRating,
+        rating,
         userIdentifier
       );
 
@@ -102,12 +112,12 @@ export class RatingSystem {
       this.appState.setBatch({
         'rating.thumbsUp': response.ratings.thumbs_up,
         'rating.thumbsDown': response.ratings.thumbs_down,
-        'rating.userRating': finalRating === 0 ? null : finalRating,
+        'rating.userRating': rating,
         'rating.isLoading': false
       });
 
       // Show success feedback
-      this.showRatingFeedback(finalRating);
+      this.showRatingFeedback(rating);
 
     } catch (error) {
       console.error('Failed to submit rating:', error);

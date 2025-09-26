@@ -3,7 +3,7 @@
  * Basic service worker for PWA capabilities and offline support
  */
 
-const CACHE_NAME = 'radiocalico-v1.0.0';
+const CACHE_NAME = 'radiocalico-v1.0.7';
 const STATIC_CACHE_URLS = [
   '/radio-modular.html',
   '/css/main.css',
@@ -85,8 +85,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Don't cache API errors
-          if (response.ok) {
+          // Only cache GET requests that are successful
+          if (request.method === 'GET' && response.ok) {
             const responseClone = response.clone();
             caches.open(CACHE_NAME)
               .then((cache) => {
@@ -96,8 +96,12 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Fallback to cache for offline support
-          return caches.match(request);
+          // Fallback to cache for offline support (only for GET requests)
+          if (request.method === 'GET') {
+            return caches.match(request);
+          }
+          // For non-GET requests, throw the error
+          throw new Error('Network request failed');
         })
     );
     return;

@@ -175,14 +175,14 @@ class RadioCalicoApp {
 
     // Rating buttons
     if (this.uiElements.thumbsUp) {
-      this.uiElements.thumbsUp.addEventListener('click', () => {
-        this.ratingSystem.handleLike();
+      this.uiElements.thumbsUp.addEventListener('click', async () => {
+        await this.ratingSystem.handleLike();
       });
     }
 
     if (this.uiElements.thumbsDown) {
-      this.uiElements.thumbsDown.addEventListener('click', () => {
-        this.ratingSystem.handleDislike();
+      this.uiElements.thumbsDown.addEventListener('click', async () => {
+        await this.ratingSystem.handleDislike();
       });
     }
 
