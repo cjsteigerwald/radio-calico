@@ -3,7 +3,7 @@
  * Basic service worker for PWA capabilities and offline support
  */
 
-const CACHE_NAME = 'radiocalico-v1.0.7';
+const CACHE_NAME = 'radiocalico-v1.1.0';
 const STATIC_CACHE_URLS = [
   '/radio-modular.html',
   '/css/main.css',
@@ -19,12 +19,17 @@ const STATIC_CACHE_URLS = [
   '/css/utilities/helpers.css',
   '/js/app.js',
   '/js/utils/AppState.js',
+  '/js/utils/constants.js',
   '/js/services/ApiService.js',
   '/js/services/iTunesService.js',
   '/js/services/MetadataService.js',
   '/js/modules/AudioPlayer.js',
   '/js/modules/RatingSystem.js',
-  '/RadioCalicoLogoTM.png'
+  '/RadioCalicoLogoTM.webp',
+  '/RadioCalicoLogoTM.png',
+  '/RadioCalicoLogoTM-favicon.webp',
+  '/RadioCalicoLogoTM-icon-192.webp',
+  '/RadioCalicoLogoTM-icon-512.webp'
 ];
 
 // Install event - cache static assets
@@ -154,8 +159,8 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data ? event.data.text() : 'New track playing on RadioCalico',
-    icon: '/RadioCalicoLogoTM.png',
-    badge: '/RadioCalicoLogoTM.png',
+    icon: '/RadioCalicoLogoTM-icon-192.webp',
+    badge: '/RadioCalicoLogoTM-favicon.webp',
     tag: 'track-notification',
     requireInteraction: false
   };

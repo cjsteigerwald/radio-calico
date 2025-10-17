@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const compression = require('compression');
 
 const config = require('./config');
 const database = require('./database/db');
@@ -24,6 +25,21 @@ const app = express();
 app.use(securityHeaders);
 app.use(customSecurityHeaders);
 
+// Compression middleware - apply early for maximum benefit
+app.use(compression({
+  // Compress all responses
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      // Don't compress responses if this header is present
+      return false;
+    }
+    // Use compression's default filter
+    return compression.filter(req, res);
+  },
+  // Compression level: 6 is a good balance between speed and compression
+  level: 6
+}));
+
 // Middleware setup
 if (config.logging.enableRequestLogging) {
   app.use(requestLogger);
@@ -41,8 +57,12 @@ app.use(sanitizeInput);
 // Apply rate limiting to API routes
 app.use('/api/', apiLimiter);
 
-// Static files
-app.use(express.static('public'));
+// Static files with cache headers for performance
+app.use(express.static('public', {
+  maxAge: config.server.nodeEnv === 'production' ? '1d' : 0,
+  etag: true,
+  lastModified: true
+}));
 
 // API routes
 app.use('/api', routes);

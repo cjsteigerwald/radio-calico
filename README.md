@@ -1,10 +1,11 @@
 # RadioCalico
 
-![Tests](https://img.shields.io/badge/tests-33%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-78%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-backend%2080%25%20%7C%20frontend%2075%25-blue)
+![Performance](https://img.shields.io/badge/performance-Phase%201%20optimized-success)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A modern internet radio streaming application with high-quality audio and interactive features. Built with Node.js/Express backend and modular frontend architecture. Features comprehensive unit testing with Jest, including in-memory database isolation and full CI/CD integration.
+A modern internet radio streaming application with high-quality audio and interactive features. Built with Node.js/Express backend and modular frontend architecture. Features comprehensive unit testing with Jest, page speed optimization (39% faster), and full CI/CD integration.
 
 ## Features
 
@@ -16,6 +17,7 @@ A modern internet radio streaming application with high-quality audio and intera
 - **Mobile Responsive** - Optimized for all device sizes
 - **Accessibility Compliant** - WCAG 2.1 AA standards
 - **Enterprise Security** - Multi-layered security with OWASP Top 10 protection
+- **Performance Optimized** - 39% transfer size reduction, WebP images, gzip/brotli compression
 
 ## Architecture
 
@@ -31,6 +33,7 @@ A modern internet radio streaming application with high-quality audio and intera
 - **ES6 Modules** - 7 JavaScript modules with reactive state management
 - **Semantic HTML** - Accessible markup with ARIA labels
 - **Service Worker** - PWA capabilities with offline caching
+- **Performance Optimized** - WebP images, resource hints, compressed assets (49KB total)
 
 ## Quick Start
 
@@ -198,6 +201,9 @@ npm run test:backend # Run backend tests only
 npm run test:frontend # Run frontend tests only
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Generate coverage report
+
+# Performance optimization
+npm run optimize:images # Convert logo to WebP format
 
 # Save test results for tracking
 make test-save       # Run tests and archive results
@@ -441,6 +447,12 @@ npm run test:frontend
 - **Testing Strategy** (`testing-strategy.md`) - Complete testing approach and guidelines
 - **Testing Framework** (`testing-framework-summary.md`) - Framework overview and setup
 - **Testing Fixes Plan** (`testing-critical-fixes-plan.md`) - Phase 1 critical fixes documentation
+
+### Performance Optimization Documentation (`/docs/`)
+- **Documentation Index** (`README.md`) - Complete documentation navigation
+- **Optimization Plan** (`page-speed-optimization-plan.md`) - 4-phase strategy and results
+- **Phase 1 Report** (`phase-1-completion-report.md`) - Detailed performance improvements
+- **Quick Summary** (`../PHASE-1-SUMMARY.md`) - Phase 1 implementation summary
 
 ## Deployment
 
