@@ -1,0 +1,38 @@
+{
+  "name": "RadioCalico - Live Stream Player",
+  "short_name": "RadioCalico",
+  "description": "High-quality internet radio streaming with interactive features",
+  "start_url": "/radio-modular.html",
+  "display": "standalone",
+  "background_color": "#1F4E23",
+  "theme_color": "#1F4E23",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/RadioCalicoLogoTM-favicon.webp",
+      "sizes": "32x32",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "/RadioCalicoLogoTM-icon-192.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/RadioCalicoLogoTM-icon-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/RadioCalicoLogoTM.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["music", "entertainment"],
+  "screenshots": []
+}

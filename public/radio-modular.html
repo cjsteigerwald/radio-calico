@@ -5,11 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadioCalico - Live Stream Player</title>
 
+    <!-- Preconnect to external domains for faster resource loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+    <!-- Google Fonts - Optimized loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
     <!-- Modular CSS -->
     <link rel="stylesheet" href="css/main.css">
 
-    <!-- Favicon -->
-    <link rel="icon" href="RadioCalicoLogoTM.png" type="image/png">
+    <!-- Favicon - WebP with PNG fallback -->
+    <link rel="icon" type="image/webp" href="RadioCalicoLogoTM-favicon.webp">
+    <link rel="icon" type="image/png" href="RadioCalicoLogoTM.png">
+
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" href="RadioCalicoLogoTM-icon-192.webp">
+    <link rel="manifest" href="/manifest.json">
 
     <!-- Meta tags for PWA and SEO -->
     <meta name="description" content="RadioCalico - Live streaming radio with high-quality audio and interactive features">
@@ -19,13 +35,16 @@
     <!-- Open Graph meta tags -->
     <meta property="og:title" content="RadioCalico - Live Stream Player">
     <meta property="og:description" content="High-quality internet radio streaming">
-    <meta property="og:image" content="RadioCalicoLogoTM.png">
+    <meta property="og:image" content="RadioCalicoLogoTM.webp">
     <meta property="og:type" content="website">
 </head>
 <body class="layout-container">
     <!-- Header -->
     <header class="header-bar" role="banner">
-        <img src="RadioCalicoLogoTM.png" alt="RadioCalico Logo" class="logo">
+        <picture>
+            <source srcset="RadioCalicoLogoTM.webp" type="image/webp">
+            <img src="RadioCalicoLogoTM.png" alt="RadioCalico Logo" class="logo">
+        </picture>
         <h1 class="header-title">Radio Calico</h1>
     </header>
 
@@ -174,7 +193,7 @@
     <audio id="audioPlayer" class="audio-player" aria-hidden="true"></audio>
 
     <!-- External Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15"></script>
 
     <!-- Application JavaScript (ES6 Modules) -->
     <script type="module" src="js/app.js?v=5"></script>
