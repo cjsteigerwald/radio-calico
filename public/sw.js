@@ -3,20 +3,10 @@
  * Basic service worker for PWA capabilities and offline support
  */
 
-const CACHE_NAME = 'radiocalico-v1.1.0';
+const CACHE_NAME = 'radiocalico-v1.3.0';
 const STATIC_CACHE_URLS = [
   '/radio-modular.html',
-  '/css/main.css',
-  '/css/base/variables.css',
-  '/css/base/reset.css',
-  '/css/base/layout.css',
-  '/css/components/header.css',
-  '/css/components/album-artwork.css',
-  '/css/components/track-details.css',
-  '/css/components/rating-system.css',
-  '/css/components/player-controls.css',
-  '/css/components/recent-tracks.css',
-  '/css/utilities/helpers.css',
+  '/dist/styles.min.css',
   '/js/app.js',
   '/js/utils/AppState.js',
   '/js/utils/constants.js',
