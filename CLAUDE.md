@@ -280,6 +280,18 @@ Page speed optimization implementation:
 - **docs/phase-1-completion-report.md** - Phase 1 detailed results (39% improvement)
 - **PHASE-1-SUMMARY.md** - Quick reference summary in project root
 
+### Architecture Documentation (docs/)
+System architecture and design visualization:
+
+- **docs/architecture-diagram.md** - Complete system architecture (7 Mermaid diagrams)
+  - Full system architecture with all layers
+  - Frontend module architecture with state management
+  - Backend MVC flow (sequence diagrams)
+  - Database architecture (dual SQLite/PostgreSQL)
+  - Security architecture (multi-layered protection)
+  - Deployment architecture (development and production)
+  - CI/CD pipeline flow
+
 ### Refactoring Plan (kb/proposed/)
 - **kb/proposed/overview.md** - Complete 8-phase refactoring plan
 - Individual phase documentation for Phases 1-6

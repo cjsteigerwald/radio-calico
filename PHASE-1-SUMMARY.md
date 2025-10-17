@@ -226,6 +226,7 @@ git checkout HEAD~1 -- src/server.js
 
 - **Full Plan:** `docs/page-speed-optimization-plan.md`
 - **Detailed Report:** `docs/phase-1-completion-report.md`
+- **Architecture Diagrams:** `docs/architecture-diagram.md` (7 Mermaid diagrams)
 - **Docs Index:** `docs/README.md`
 
 ---

@@ -34,6 +34,17 @@ This directory contains comprehensive documentation for the RadioCalico project,
   - Security best practices
   - Development and production configs
 
+### 🏗️ Architecture
+
+- **[System Architecture Diagrams](architecture-diagram.md)** ⭐ NEW - Complete system architecture visualization
+  - Full system architecture (client, server, database, external services)
+  - Frontend module architecture with state management
+  - Backend MVC flow (sequence diagrams)
+  - Database architecture (dual SQLite/PostgreSQL)
+  - Security architecture (multi-layered protection)
+  - Deployment architecture (development and production)
+  - CI/CD pipeline flow
+
 ## Current Status (October 2025)
 
 ### ✅ Completed Features
@@ -78,6 +89,9 @@ This directory contains comprehensive documentation for the RadioCalico project,
 docs/
 ├── README.md (this file)
 │
+├── Architecture
+│   └── architecture-diagram.md (7 Mermaid diagrams)
+│
 ├── Performance Optimization
 │   ├── page-speed-optimization-plan.md
 │   └── phase-1-completion-report.md
@@ -100,7 +114,7 @@ docs/
 ### For Developers
 
 1. **Getting Started**: Read the main `CLAUDE.md` in project root
-2. **Architecture**: See `kb/backend-architecture.md` and `kb/api-documentation.md`
+2. **Architecture**: See `architecture-diagram.md` for visual overview and `kb/backend-architecture.md` for details
 3. **Testing**: Review `testing-strategy.md` before writing tests
 4. **Optimization**: Check current phase status in optimization docs
 
@@ -206,7 +220,8 @@ docs/
 ## Support & Contact
 
 For questions about:
-- **Architecture**: See `kb/backend-architecture.md`
+- **Architecture**: See `architecture-diagram.md` for visual diagrams
+- **Backend Architecture**: See `kb/backend-architecture.md`
 - **API Usage**: See `kb/api-documentation.md`
 - **Testing**: See `testing-strategy.md`
 - **Performance**: See `page-speed-optimization-plan.md`

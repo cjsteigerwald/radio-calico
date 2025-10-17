@@ -454,6 +454,13 @@ npm run test:frontend
 - **Phase 1 Report** (`phase-1-completion-report.md`) - Detailed performance improvements
 - **Quick Summary** (`../PHASE-1-SUMMARY.md`) - Phase 1 implementation summary
 
+### Architecture Documentation (`/docs/`)
+- **System Architecture Diagrams** (`architecture-diagram.md`) - Visual architecture documentation
+  - 7 comprehensive Mermaid diagrams covering all system layers
+  - Frontend and backend architecture with data flow
+  - Security and deployment architecture
+  - CI/CD pipeline visualization
+
 ## Deployment
 
 ### Production Deployment with Docker
